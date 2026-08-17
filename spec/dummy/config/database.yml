@@ -1,21 +1,18 @@
-# Dummy app database. The engine is database-agnostic; the dummy uses whatever
-# is convenient locally. Here: PostgreSQL over the local socket.
+# Dummy app database. The engine is database-agnostic; use SQLite so the test
+# suite is self-contained for contributors and CI.
 default: &default
-  adapter: postgresql
-  encoding: unicode
+  adapter: sqlite3
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
-  host: <%= ENV.fetch("PG_HOST", "localhost") %>
-  username: <%= ENV.fetch("PG_USERNAME", ENV["USER"]) %>
-  password: <%= ENV.fetch("PG_PASSWORD", "") %>
+  timeout: 5000
 
 development:
   <<: *default
-  database: venus_media_library_dummy_development
+  database: storage/development.sqlite3
 
 test:
   <<: *default
-  database: venus_media_library_dummy_test
+  database: storage/test.sqlite3
 
 production:
   <<: *default
-  database: venus_media_library_dummy_production
+  database: storage/production.sqlite3

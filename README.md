@@ -256,7 +256,7 @@ cd spec/dummy && bundle exec rspec ../
 Or use the included Rakefile:
 
 ```bash
-bundle exec rake spec
+bundle exec rake app:spec
 ```
 
 When testing a host app that uses Media Library, you can:

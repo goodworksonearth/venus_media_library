@@ -2,6 +2,10 @@
 require "rubygems"
 require "bundler/setup"
 
+# Keep the cache inside the checkout by default so linting works in isolated
+# environments and does not write to a contributor's home directory.
+ENV["RUBOCOP_CACHE_ROOT"] ||= File.expand_path("../tmp/rubocop", __dir__)
+
 # explicit rubocop config increases performance slightly while avoiding config confusion.
 ARGV.unshift("--config", File.expand_path("../.rubocop.yml", __dir__))
 
