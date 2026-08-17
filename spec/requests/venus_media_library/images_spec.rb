@@ -2,6 +2,12 @@ require "rails_helper"
 
 module VenusMediaLibrary
   RSpec.describe "Images", type: :request do
+    around do |example|
+      original = VenusMediaLibrary.configuration.allowed_content_types
+      example.run
+      VenusMediaLibrary.configuration.allowed_content_types = original
+    end
+
     def create_image_blob(filename: "existing.png", content_type: "image/png")
       ActiveStorage::Blob.create_and_upload!(
         io: File.open(VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.png")),
@@ -18,13 +24,24 @@ module VenusMediaLibrary
       )
     end
 
-    describe "GET /media/images" do
+    describe "GET /venus_media_library" do
+      it "renders the browsable library at the mounted root" do
+        create_image_blob(filename: "library.png")
+
+        get "/venus_media_library"
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("Media Library", "library.png")
+      end
+    end
+
+    describe "GET /venus_media_library/images" do
       it "returns image blobs as JSON, newest first" do
         old = create_image_blob(filename: "old.png")
         new = create_image_blob(filename: "new.png")
         create_non_image_blob # should be excluded
 
-        get "/media/images.json"
+        get "/venus_media_library/images.json"
 
         expect(response).to have_http_status(:ok)
         body = JSON.parse(response.body)
@@ -40,7 +57,7 @@ module VenusMediaLibrary
       it "renders an HTML grid" do
         create_image_blob(filename: "grid.png")
 
-        get "/media/images"
+        get "/venus_media_library/images"
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("ml-grid")
@@ -48,18 +65,18 @@ module VenusMediaLibrary
       end
 
       it "paginates" do
-        get "/media/images.json", params: { page: 2, per_page: 1 }
+        get "/venus_media_library/images.json", params: { page: 2, per_page: 1 }
         expect(response).to have_http_status(:ok)
         expect(JSON.parse(response.body)["page"]).to eq(2)
       end
     end
 
-    describe "POST /media/images" do
+    describe "POST /venus_media_library/images" do
       it "uploads a file and stores an Active Storage blob" do
         file = fixture_file_upload("sample.png", "image/png")
 
         expect {
-          post "/media/images.json", params: { file: file }
+          post "/venus_media_library/images.json", params: { file: file }
         }.to change(ActiveStorage::Blob, :count).by(1)
 
         expect(response).to have_http_status(:created)
@@ -72,11 +89,34 @@ module VenusMediaLibrary
         expect(blob.download.bytesize).to eq(File.size(VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.png")))
       end
 
+      it "uploads SVG files by default" do
+        file = fixture_file_upload("sample.svg", "image/svg+xml")
+
+        expect {
+          post "/venus_media_library/images.json", params: { file: file }
+        }.to change(ActiveStorage::Blob, :count).by(1)
+
+        expect(response).to have_http_status(:created)
+        expect(JSON.parse(response.body)).to include("content_type" => "image/svg+xml")
+      end
+
+      it "honors a narrowed configured allowlist" do
+        VenusMediaLibrary.configuration.allowed_content_types = %w[image/png]
+        file = fixture_file_upload("sample.svg", "image/svg+xml")
+
+        expect {
+          post "/venus_media_library/images.json", params: { file: file }
+        }.not_to change(ActiveStorage::Blob, :count)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body)["error"]).to include("image/svg+xml")
+      end
+
       it "rejects a disallowed content type" do
         file = fixture_file_upload("sample.png", "application/x-msdownload")
 
         expect {
-          post "/media/images.json", params: { file: file }
+          post "/venus_media_library/images.json", params: { file: file }
         }.not_to change(ActiveStorage::Blob, :count)
 
         expect(response).to have_http_status(:unprocessable_entity)
@@ -84,7 +124,7 @@ module VenusMediaLibrary
       end
 
       it "returns an error when no file is provided" do
-        post "/media/images.json"
+        post "/venus_media_library/images.json"
         expect(response).to have_http_status(:unprocessable_entity)
       end
     end

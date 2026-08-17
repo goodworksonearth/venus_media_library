@@ -23,7 +23,7 @@ module VenusMediaLibrary
       create_image_blob
       VenusMediaLibrary.configuration.url_type = :redirect
 
-      get "/media/images.json"
+      get "/venus_media_library/images.json"
 
       url = JSON.parse(response.body)["images"].first["url"]
       expect(url).to include("/rails/active_storage/blobs/redirect/")
@@ -34,7 +34,7 @@ module VenusMediaLibrary
       create_image_blob
       VenusMediaLibrary.configuration.url_type = :proxy
 
-      get "/media/images.json"
+      get "/venus_media_library/images.json"
 
       url = JSON.parse(response.body)["images"].first["url"]
       expect(url).to include("/rails/active_storage/blobs/proxy/")

@@ -4,6 +4,8 @@ module VenusMediaLibrary
   class ImagesController < ApplicationController
     include VenusMediaLibrary::ImagesHelper
 
+    MAX_PER_PAGE = 100
+
     # GET /images
     # Lists image blobs, newest first, with simple offset pagination.
     # Responds with an HTML grid or a JSON payload for the picker.
@@ -59,17 +61,16 @@ module VenusMediaLibrary
     end
 
     def per_page
-      value = params[:per_page].presence&.to_i
-      value && value.positive? ? value : VenusMediaLibrary.configuration.per_page
+      requested = params[:per_page].presence&.to_i
+      value = requested&.positive? ? requested : VenusMediaLibrary.configuration.per_page.to_i
+
+      value.clamp(1, MAX_PER_PAGE)
     end
 
     def allowed_content_type?(content_type)
       return false if content_type.blank?
 
-      allowed = VenusMediaLibrary.configuration.allowed_content_types
-      return content_type.start_with?("image/") if allowed.blank?
-
-      allowed.include?(content_type) || content_type.start_with?("image/")
+      Array(VenusMediaLibrary.configuration.allowed_content_types).include?(content_type)
     end
 
     def respond_error(message, status)

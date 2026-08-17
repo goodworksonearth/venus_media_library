@@ -11,9 +11,9 @@ module VenusMediaLibrary
   #     config.storage_service       = :amazon
   #   end
   class Configuration
-    # Content types accepted by the uploader and shown in the library grid.
-    # Every entry is matched literally; the index additionally shows any blob
-    # whose content_type starts with "image/".
+    # Content types accepted by the uploader. Every entry is matched literally;
+    # the index independently shows any existing blob whose content_type starts
+    # with "image/".
     attr_accessor :allowed_content_types
 
     # [width, height] used for the grid thumbnail variant.

@@ -14,7 +14,7 @@ module VenusMediaLibrary
     it "allows access when no authenticator is configured (default)" do
       VenusMediaLibrary.configuration.authenticate_with = nil
 
-      get "/media/images.json"
+      get "/venus_media_library/images.json"
 
       expect(response).to have_http_status(:ok)
     end
@@ -24,7 +24,7 @@ module VenusMediaLibrary
         head :forbidden
       end
 
-      get "/media/images.json"
+      get "/venus_media_library/images.json"
 
       expect(response).to have_http_status(:forbidden)
     end

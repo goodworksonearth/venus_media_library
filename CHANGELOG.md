@@ -4,6 +4,23 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-08-17
+
+### Added
+- A self-contained SQLite dummy app and test suite; contributors and CI no
+  longer need PostgreSQL.
+- CI coverage for RuboCop, the full RSpec suite, gem building, and package
+  validation.
+- SVG upload coverage. `image/svg+xml` remains part of the default upload
+  allowlist.
+
+### Changed
+- The dummy app and installation guide now mount the browsable library at
+  `/venus_media_library`; the engine root at that URL renders the image grid.
+- `allowed_content_types` now strictly controls uploads instead of implicitly
+  permitting every `image/*` MIME type.
+- JSON pagination is capped at 100 images per page.
+
 ## [0.1.0] - 2026-08-15
 
 ### Added

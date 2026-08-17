@@ -34,7 +34,7 @@ Active Storage must be installed in the host app (`bin/rails active_storage:inst
 In the host app's `config/routes.rb`:
 
 ```ruby
-mount VenusMediaLibrary::Engine, at: "/media"
+mount VenusMediaLibrary::Engine, at: "/venus_media_library"
 ```
 
 Include the picker JavaScript once in your layout (Propshaft/Sprockets):
@@ -92,14 +92,15 @@ permitting the attachment param (e.g. `params.permit(:cover)`).
 
 ### Endpoints
 
-Mounted at your chosen path (examples assume `/media`):
+Mounted at your chosen path (examples assume `/venus_media_library`):
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/media/images` | HTML thumbnail grid (also `.json`) |
-| `GET` | `/media/images.json` | `{ images: [...], page:, has_more:, total: }` |
-| `POST` | `/media/images` | Upload a file (param `file`); returns the image JSON |
-| `GET` | `/media/picker?target=<input_id>` | Turbo Frame body for the modal |
+| `GET` | `/venus_media_library` | Browsable HTML thumbnail grid |
+| `GET` | `/venus_media_library/images` | HTML thumbnail grid (also `.json`) |
+| `GET` | `/venus_media_library/images.json` | `{ images: [...], page:, has_more:, total: }` |
+| `POST` | `/venus_media_library/images` | Upload a file (param `file`); returns the image JSON |
+| `GET` | `/venus_media_library/picker?target=<input_id>` | Turbo Frame body for the modal |
 
 Each image payload includes `id`, `signed_id`, `filename`, `content_type`, `byte_size`, `url`, and `thumb_url`.
 
@@ -141,11 +142,11 @@ end
 
 ### Configuration Details
 
-- **`allowed_content_types`** — Restricts uploads to these MIME types. The grid always shows any blob with `image/*` content type regardless. Defaults to common image formats; customize only if you need to block certain types.
+- **`allowed_content_types`** — Restricts uploads to these exact MIME types. The default explicitly includes SVG (`image/svg+xml`). The grid always shows any existing blob with an `image/*` content type regardless.
 
 - **`thumbnail_size`** — Array of `[width, height]` for grid thumbnails. Larger values give better preview quality at the cost of image processing overhead and bandwidth.
 
-- **`per_page`** — Number of images to display per page. Smaller values suit mobile-friendly UIs; larger values reduce pagination clicks.
+- **`per_page`** — Number of images to display per page. Smaller values suit mobile-friendly UIs; larger values reduce pagination clicks. JSON callers can request up to 100 images per page.
 
 - **`storage_service`** — Active Storage service name (e.g. `:amazon`, `:google`). Leave `nil` to use the host app's default, making the engine truly storage-agnostic. Uploads automatically inherit the configured service.
 
@@ -232,11 +233,11 @@ If you must support IE11, you'll need polyfills. No Turbo Drive requirement, but
 
 ### The Picker Flow
 
-1. **User clicks "Choose from library"** — Opens a modal via a Turbo Frame (`GET /media/picker?target=<input_id>`).
+1. **User clicks "Choose from library"** — Opens a modal via a Turbo Frame (`GET /venus_media_library/picker?target=<input_id>`).
 2. **Modal loads the image grid** — The frame fetches the index view, listing images newest-first with pagination.
 3. **User uploads or selects** —
    - **Select:** Click an image tile; JavaScript writes the blob's `signed_id` and URL into the form inputs and closes the modal.
-   - **Upload:** Click the upload button; JavaScript posts the file to `POST /media/images`, attaches the new blob to the same inputs, and reloads the grid.
+   - **Upload:** Click the upload button; JavaScript posts the file to `POST /venus_media_library/images`, attaches the new blob to the same inputs, and reloads the grid.
 4. **Form submission** — The host app form submits with the image data, storing it as a URL column or Active Storage attachment.
 
 ### URL Signing & Storage Agnosticism
@@ -313,12 +314,12 @@ end
 
 **Solution:** Check browser console for errors. Verify:
 1. JavaScript is loaded: `<%= javascript_include_tag "venus_media_library/venus_media_library", defer: true %>`
-2. The engine is mounted and accessible at your chosen path (default: `/media`).
+2. The engine is mounted and accessible at your chosen path (recommended: `/venus_media_library`).
 3. No JavaScript errors in other assets are breaking the page.
 
 ## Development
 
-The engine ships with a dummy app under `spec/dummy` (Active Storage configured with the Disk service, engine mounted at `/media`).
+The engine ships with a dummy app under `spec/dummy` (Active Storage configured with the Disk service, engine mounted at `/venus_media_library`).
 
 ```bash
 bundle install

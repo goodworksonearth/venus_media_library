@@ -24,7 +24,7 @@ module VenusMediaLibrary
       expect(html).to include("Pick image")
       expect(html).to include('data-ml-open="true"')
       expect(html).to include('data-ml-target="page_og_image"')
-      expect(html).to include("/media/picker")
+      expect(html).to include("/venus_media_library/picker")
       expect(html).to include("target=page_og_image").or include("target%3Dpage_og_image").or include("page_og_image")
     end
 
