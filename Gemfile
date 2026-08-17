@@ -20,3 +20,5 @@ gem "rubocop-rails-omakase", require: false
 
 # Test framework
 gem "rspec-rails", ">= 6.0", group: [ :development, :test ]
+gem "capybara", group: :test
+gem "selenium-webdriver", group: :test

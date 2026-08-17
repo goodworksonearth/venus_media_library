@@ -6,6 +6,7 @@ require_relative "dummy/config/environment"
 abort("The Rails environment is running in production mode!") if Rails.env.production?
 
 require "rspec/rails"
+require "capybara/rspec"
 
 # Load support files (factories, helpers, etc.)
 Dir[File.join(__dir__, "support/**/*.rb")].sort.each { |f| require f }
@@ -33,5 +34,11 @@ RSpec.configure do |config|
 
   config.after(:suite) do
     FileUtils.rm_rf(Rails.root.join("tmp/storage")) if Rails.root.join("tmp/storage").exist?
+  end
+
+  config.before(type: :system) do
+    VenusMediaLibrary.configuration.current_user = -> { Widget.first }
+    VenusMediaLibrary.configuration.admin = ->(_user) { false }
+    driven_by :selenium, using: :headless_chrome, screen_size: [ 1400, 1400 ]
   end
 end
