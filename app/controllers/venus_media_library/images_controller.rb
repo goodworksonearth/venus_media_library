@@ -4,6 +4,8 @@ module VenusMediaLibrary
   class ImagesController < ApplicationController
     include VenusMediaLibrary::ImagesHelper
 
+    MAX_PER_PAGE = 100
+
     # GET /images
     # Lists image blobs, newest first, with simple offset pagination.
     # Responds with an HTML grid or a JSON payload for the picker.
@@ -12,11 +14,11 @@ module VenusMediaLibrary
       @per_page = per_page
       offset    = (@page - 1) * @per_page
 
-      scope        = image_blobs
+      scope        = visible_media_assets
       @total_count = scope.count
       @blobs       = scope.order(created_at: :desc).offset(offset).limit(@per_page).to_a
       @has_more    = offset + @blobs.size < @total_count
-      @images      = @blobs.map { |blob| ml_image_payload(blob) }
+      @images      = @blobs.map { |asset| ml_image_payload(asset) }
 
       respond_to do |format|
         format.html # index.html.erb
@@ -45,31 +47,33 @@ module VenusMediaLibrary
         content_type: uploaded.content_type,
         service_name: VenusMediaLibrary.configuration.storage_service
       )
+      asset = VenusMediaLibrary::Asset.create!(
+        blob: blob, owner: venus_media_library_user,
+        community_shared: ActiveModel::Type::Boolean.new.cast(params[:community_shared]) || false
+      )
 
       respond_to do |format|
-        format.json { render json: ml_image_payload(blob), status: :created }
+        format.json { render json: ml_image_payload(asset), status: :created }
         format.html { redirect_to images_path }
       end
+    rescue ActiveRecord::RecordInvalid
+      blob&.purge
+      raise
     end
 
     private
 
-    def image_blobs
-      ActiveStorage::Blob.where("content_type LIKE ?", "image/%")
-    end
-
     def per_page
-      value = params[:per_page].presence&.to_i
-      value && value.positive? ? value : VenusMediaLibrary.configuration.per_page
+      requested = params[:per_page].presence&.to_i
+      value = requested&.positive? ? requested : VenusMediaLibrary.configuration.per_page.to_i
+
+      value.clamp(1, MAX_PER_PAGE)
     end
 
     def allowed_content_type?(content_type)
       return false if content_type.blank?
 
-      allowed = VenusMediaLibrary.configuration.allowed_content_types
-      return content_type.start_with?("image/") if allowed.blank?
-
-      allowed.include?(content_type) || content_type.start_with?("image/")
+      Array(VenusMediaLibrary.configuration.allowed_content_types).include?(content_type)
     end
 
     def respond_error(message, status)

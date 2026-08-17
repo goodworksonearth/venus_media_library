@@ -7,12 +7,12 @@ module VenusMediaLibrary
     def show
       @target = params[:target].to_s
       @page   = [ params.fetch(:page, 1).to_i, 1 ].max
-      per     = VenusMediaLibrary.configuration.per_page
+      per     = [ VenusMediaLibrary.configuration.per_page.to_i, 1 ].max.clamp(1, ImagesController::MAX_PER_PAGE)
       offset  = (@page - 1) * per
 
-      scope     = ActiveStorage::Blob.where("content_type LIKE ?", "image/%")
+      scope     = visible_media_assets
       @has_more = offset + per < scope.count
-      @images   = scope.order(created_at: :desc).offset(offset).limit(per).map { |blob| ml_image_payload(blob) }
+      @images   = scope.order(created_at: :desc).offset(offset).limit(per).map { |asset| ml_image_payload(asset) }
 
       render partial: "venus_media_library/pickers/picker",
              locals: { target: @target, images: @images, page: @page, has_more: @has_more },

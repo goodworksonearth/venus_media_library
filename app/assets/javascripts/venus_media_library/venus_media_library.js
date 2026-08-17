@@ -90,6 +90,8 @@
 
     var form = new FormData();
     form.append("file", file);
+    var share = document.querySelector("[data-ml-community-share]");
+    form.append("community_shared", share && share.checked ? "1" : "0");
 
     var headers = { "Accept": "application/json" };
     var token = csrfToken();

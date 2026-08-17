@@ -1,0 +1,20 @@
+<div class="ml-library">
+  <header class="ml-library__header">
+    <h1>Unowned legacy uploads</h1>
+    <p class="ml-library__count"><%= @legacy_blobs.size %> image<%= "s" unless @legacy_blobs.size == 1 %> awaiting import</p>
+  </header>
+
+  <% if @legacy_blobs.empty? %>
+    <p class="ml-empty">No unowned legacy uploads found.</p>
+  <% else %>
+    <div class="ml-grid">
+      <% @legacy_blobs.each do |blob| %>
+        <article class="ml-tile">
+          <img src="<%= thumbnail_legacy_asset_path(blob) %>" alt="<%= blob.filename %>" loading="lazy">
+          <span class="ml-tile__name"><%= blob.filename %></span>
+          <%= button_to "Import into my private library", import_legacy_asset_path(blob), method: :post, class: "ml-btn" %>
+        </article>
+      <% end %>
+    </div>
+  <% end %>
+</div>

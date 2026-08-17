@@ -6,7 +6,7 @@ on:
     branches: [ main ]
 
 jobs:
-  lint:
+  quality:
     runs-on: ubuntu-latest
     env:
       RUBY_VERSION: 3.4.7
@@ -34,3 +34,11 @@ jobs:
       - name: Lint code for consistent style
         run: bin/rubocop -f github
 
+      - name: Run test suite
+        run: bundle exec rake app:spec
+
+      - name: Build gem package
+        run: bundle exec gem build venus_media_library.gemspec
+
+      - name: Validate gem package
+        run: gem check venus_media_library-*.gem

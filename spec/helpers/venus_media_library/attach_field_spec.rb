@@ -36,7 +36,7 @@ module VenusMediaLibrary
       expect(html).to include("Pick a cover")
       expect(html).to include('data-ml-open="true"')
       expect(html).to include('data-ml-target="widget_cover"')
-      expect(html).to include("/media/picker")
+      expect(html).to include("/venus_media_library/picker")
     end
 
     it "renders the shared modal shell only once per page" do

@@ -2,6 +2,9 @@
   <header class="ml-library__header">
     <h1>Media Library</h1>
     <p class="ml-library__count"><%= @total_count %> image<%= "s" unless @total_count == 1 %></p>
+    <% if venus_media_library_admin? %>
+      <p><%= link_to "Import unowned legacy uploads", legacy_assets_path, class: "ml-btn" %></p>
+    <% end %>
   </header>
 
   <% if @images.empty? %>

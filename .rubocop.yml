@@ -1,6 +1,12 @@
 # Omakase Ruby styling for Rails
 inherit_gem: { rubocop-rails-omakase: rubocop.yml }
 
+# Rails regenerates the dummy app schema; lint the hand-written engine and
+# specs, not framework-generated formatting.
+AllCops:
+  Exclude:
+    - "spec/dummy/db/schema.rb"
+
 # Overwrite or add rules to create your own house style
 #
 # # Use `[a, [b, c]]` not `[ a, [ b, c ] ]`
