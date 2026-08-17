@@ -11,6 +11,7 @@ VenusMediaLibrary::Engine.routes.draw do
   resources :static_assets, only: [ :index ]
   resources :community_assets, only: [ :index ]
   resources :cloud_assets, only: [ :index ]
+  resource :settings, only: [ :show ], controller: "settings"
 
   # Turbo Frame that renders the picker modal body for a given target field.
   get "picker", to: "pickers#show", as: :picker
