@@ -18,8 +18,9 @@ module VenusMediaLibrary
     end
 
     def create_image_asset(owner: member, filename: "existing.png", content_type: "image/png", community_shared: false)
+      fixture = content_type == "application/pdf" ? "sample.pdf" : "sample.png"
       blob = ActiveStorage::Blob.create_and_upload!(
-        io: File.open(VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.png")),
+        io: File.open(VenusMediaLibrary::Engine.root.join("spec/fixtures/files/#{fixture}")),
         filename: filename,
         content_type: content_type
       )
@@ -71,6 +72,16 @@ module VenusMediaLibrary
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("ml-grid", "grid.png")
+      end
+
+      it "renders PDFs as document tiles without an image preview" do
+        create_image_asset(filename: "guide.pdf", content_type: "application/pdf")
+
+        get "/venus_media_library/images", headers: venus_media_headers(member)
+
+        expect(response).to have_http_status(:ok)
+        expect(response.body).to include("guide.pdf", "ml-tile__document", "PDF")
+        expect(response.body).not_to include("/assets/#{VenusMediaLibrary::Asset.last.id}/thumbnail")
       end
 
       it "paginates" do
@@ -150,6 +161,26 @@ module VenusMediaLibrary
         expect(response).to have_http_status(:created)
         body = JSON.parse(response.body)
         expect(body).to include("content_type" => "image/svg+xml", "community_shared" => true)
+      end
+
+      it "uploads PDFs only when the host explicitly enables them" do
+        VenusMediaLibrary.configuration.allowed_content_types += [ "application/pdf" ]
+        file = fixture_file_upload("sample.pdf", "application/pdf")
+
+        post "/venus_media_library/images.json", params: { file: file }, headers: venus_media_headers(member)
+
+        expect(response).to have_http_status(:created)
+        body = JSON.parse(response.body)
+        expect(body).to include("content_type" => "application/pdf", "previewable" => false, "thumb_url" => nil)
+      end
+
+      it "keeps PDFs disabled by default" do
+        file = fixture_file_upload("sample.pdf", "application/pdf")
+
+        post "/venus_media_library/images.json", params: { file: file }, headers: venus_media_headers(member)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body)["error"]).to include("application/pdf")
       end
 
       it "honors a narrowed configured allowlist" do

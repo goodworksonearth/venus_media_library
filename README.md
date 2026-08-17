@@ -1,8 +1,8 @@
 # Media Library
 
-A mountable Rails engine that turns **Active Storage** into a browsable media library with an **image picker**.
+A mountable Rails engine that turns **Active Storage** into a browsable media library with an image-and-document picker.
 
-Content editors get a modal that lists authorized engine media and lets them upload new ones. Drop `media_picker_field` next to any URL field (for example an `og:image` field) so editors *select* an image instead of typing a path.
+Content editors get a modal that lists authorized engine media and lets them upload new ones. Drop `media_picker_field` next to any URL field (for example an `og:image` field) so editors *select* an approved asset instead of typing a path.
 
 It is **storage-agnostic**: it uses whatever Active Storage service the host app configures — local Disk in development, Amazon S3 (or GCS, Azure, ...) in production. The engine never talks to a storage backend directly.
 
@@ -130,6 +130,8 @@ In an initializer (e.g. `config/initializers/venus_media_library.rb`):
 VenusMediaLibrary.configure do |config|
   # Content types accepted by the uploader.
   config.allowed_content_types = %w[image/png image/jpeg image/webp image/gif image/svg+xml]
+  # Add application/pdf only when this host application permits PDF uploads.
+  # config.allowed_content_types << "application/pdf"
 
   # [width, height] for the grid thumbnail variant.
   config.thumbnail_size = [300, 300]
@@ -170,7 +172,7 @@ end
 
 ### Configuration Details
 
-- **`allowed_content_types`** — Restricts uploads to these exact MIME types. The default explicitly includes SVG (`image/svg+xml`).
+- **`allowed_content_types`** — Restricts uploads to these exact MIME types. The default explicitly includes SVG (`image/svg+xml`) but deliberately excludes PDFs. Add `application/pdf` here to enable PDF selection and uploads; PDFs render as document tiles and are delivered as protected downloads rather than embedded content.
 
 - **`thumbnail_size`** — Array of `[width, height]` for grid thumbnails. Larger values give better preview quality at the cost of image processing overhead and bandwidth.
 

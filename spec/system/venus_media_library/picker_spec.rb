@@ -3,6 +3,14 @@ require "rails_helper"
 RSpec.describe "media picker", type: :system do
   let!(:member) { Widget.create!(name: "member") }
 
+  around do |example|
+    original_content_types = VenusMediaLibrary.configuration.allowed_content_types
+    VenusMediaLibrary.configuration.allowed_content_types += [ "application/pdf" ]
+    example.run
+  ensure
+    VenusMediaLibrary.configuration.allowed_content_types = original_content_types
+  end
+
   before do
     blob = ActiveStorage::Blob.create_and_upload!(
       io: File.open(VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.png")),
@@ -11,7 +19,7 @@ RSpec.describe "media picker", type: :system do
     VenusMediaLibrary::Asset.create!(blob: blob, owner: member)
   end
 
-  it "opens, selects an asset, uploads an image, and closes with Escape" do
+  it "opens, selects media, uploads an image and PDF, and closes with Escape" do
     visit "/picker_demo"
 
     click_button "Choose media"
@@ -28,6 +36,12 @@ RSpec.describe "media picker", type: :system do
       VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.png")
     )
     expect(page).to have_css(".ml-tile", count: 2)
+
+    find("#image-upload", visible: :all).set(
+      VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.pdf")
+    )
+    expect(page).to have_css(".ml-tile", text: "sample.pdf")
+    expect(page).to have_css(".ml-tile__document", text: "PDF")
 
     page.send_keys(:escape)
     expect(page).to have_no_css("#ml-modal.ml-modal--open")

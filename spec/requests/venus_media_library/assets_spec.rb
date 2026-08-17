@@ -102,5 +102,19 @@ module VenusMediaLibrary
       expect(response).to have_http_status(:ok)
       expect(response.headers["Content-Disposition"]).to start_with("attachment")
     end
+
+    it "delivers enabled PDFs as protected attachments rather than inline documents" do
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: File.open(VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.pdf")),
+        filename: "guide.pdf", content_type: "application/pdf"
+      )
+      asset = VenusMediaLibrary::Asset.create!(blob: blob, owner: owner)
+
+      get "/venus_media_library/assets/#{asset.id}", headers: venus_media_headers(owner)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.media_type).to eq("application/pdf")
+      expect(response.headers["Content-Disposition"]).to start_with("attachment")
+    end
   end
 end

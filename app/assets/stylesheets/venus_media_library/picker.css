@@ -47,6 +47,17 @@
 }
 .ml-tile:hover { border-color: #2b6cb0; box-shadow: 0 0 0 2px rgba(43,108,176,.2); }
 .ml-tile img { width: 100%; height: 120px; object-fit: cover; display: block; background: #fafafa; }
+.ml-tile__document {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 120px;
+  background: #f8fafc;
+  color: #b42318;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+}
 .ml-tile__name {
   font-size: .75rem;
   padding: .35rem .4rem;

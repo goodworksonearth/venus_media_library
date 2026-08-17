@@ -3,15 +3,15 @@
 <turbo-frame id="venus_media_library_picker" class="ml-picker" data-ml-target="<%= target %>">
   <div class="ml-picker__toolbar">
     <label class="ml-btn ml-btn--primary">
-      Upload image
-      <input id="image-upload" type="file" accept="image/*" hidden data-ml-upload>
+      Upload media
+      <input id="image-upload" type="file" accept="<%= Array(VenusMediaLibrary.configuration.allowed_content_types).join(",") %>" hidden data-ml-upload>
     </label>
     <label class="ml-picker__share"><input type="checkbox" data-ml-community-share> Share with community</label>
     <span class="ml-picker__hint" data-ml-status></span>
   </div>
 
   <% if images.empty? %>
-    <p class="ml-empty">No images yet. Upload one above.</p>
+    <p class="ml-empty">No media yet. Upload one above.</p>
   <% else %>
     <div class="ml-grid" data-ml-grid>
       <%= render partial: "venus_media_library/images/image", collection: images, as: :image %>

@@ -20,9 +20,11 @@ module VenusMediaLibrary
     private
 
     # SVG is accepted for editorial use but is delivered as a download. Inline
-    # SVG may execute active content in a host application's origin.
+    # SVG may execute active content in a host application's origin. PDFs are
+    # also attachments: they remain selectable media but are not embedded in
+    # the host application's origin.
     def delivery_disposition(blob)
-      blob.content_type == "image/svg+xml" ? "attachment" : "inline"
+      [ "image/svg+xml", "application/pdf" ].include?(blob.content_type) ? "attachment" : "inline"
     end
   end
 end

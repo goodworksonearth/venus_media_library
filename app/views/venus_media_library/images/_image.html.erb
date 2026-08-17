@@ -1,10 +1,14 @@
-<%# Renders one selectable image tile. `image` is a payload hash from the controller. %>
+<%# Renders one selectable media tile. `image` is a payload hash from the controller. %>
 <button type="button"
         class="ml-tile"
         data-ml-signed-id="<%= image[:signed_id] %>"
         data-ml-url="<%= image[:url] %>"
         data-ml-filename="<%= image[:filename] %>"
         title="<%= image[:filename] %>">
-  <img src="<%= image[:thumb_url] %>" alt="<%= image[:filename] %>" loading="lazy">
+  <% if image[:previewable] %>
+    <img src="<%= image[:thumb_url] %>" alt="<%= image[:filename] %>" loading="lazy">
+  <% else %>
+    <span class="ml-tile__document" aria-hidden="true"><%= image[:content_type] == "application/pdf" ? "PDF" : "FILE" %></span>
+  <% end %>
   <span class="ml-tile__name"><%= image[:filename] %></span>
 </button>
