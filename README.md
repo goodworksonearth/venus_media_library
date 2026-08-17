@@ -116,7 +116,9 @@ Mounted at your chosen path (examples assume `/venus_media_library`):
 | `GET` | `/venus_media_library/images.json` | `{ images: [...], page:, has_more:, total: }` |
 | `POST` | `/venus_media_library/images` | Upload a file (param `file`); returns the image JSON |
 | `GET` | `/venus_media_library/picker?target=<input_id>` | Turbo Frame body for the modal |
+| `GET` | `/venus_media_library/community_assets` | Tenant-scoped community-shared images (also `.json`) |
 | `GET` | `/venus_media_library/static_assets` | Host-configured static-asset page (also `.json`) |
+| `GET` | `/venus_media_library/cloud_assets` | Host-configured cloud-asset page (also `.json`) |
 
 Each image payload includes `id`, `signed_id`, `filename`, `content_type`, `byte_size`, `url`, and `thumb_url`.
 
@@ -158,6 +160,11 @@ VenusMediaLibrary.configure do |config|
   config.current_user = -> { current_user }
   config.admin = ->(user) { user.admin? }
 
+  # Approved host-supplied records for non-library tabs. Each hash needs a
+  # filename and URL, with optional content_type and byte_size.
+  config.static_assets = -> { [] }
+  config.cloud_assets = -> { [] }
+
 end
 ```
 
@@ -182,6 +189,10 @@ end
 - **`legacy_blob_scope`** — A controller-context callback receiving unowned image blobs. It defaults to `scope.none`, so legacy blobs cannot cross tenant boundaries accidentally. Configure it explicitly only when the host can prove which legacy blobs belong to the current tenant.
 
 - **`static_assets`** — A controller-context callback that returns approved host asset hashes for the separate `/static_assets` page. Each hash needs `filename` and `url`, with optional `content_type` and `byte_size`; the engine never scans host directories.
+
+- **`cloud_assets`** — A controller-context callback with the same hash shape for the separate `/cloud_assets` page. Use it to present approved CDN or object-storage assets. The engine never enumerates a bucket, accepts storage credentials, or makes an arbitrary cloud object public.
+
+- **Community Assets** — The `/community_assets` tab shows only `community_shared: true` records after the host's `asset_scope` is applied. Private uploads never appear there.
 
 - **`url_type`** — Retained for backward-compatible host configuration. Browsing and picker URLs are always protected engine routes, so private uploads are never exposed via an Active Storage signed URL.
 

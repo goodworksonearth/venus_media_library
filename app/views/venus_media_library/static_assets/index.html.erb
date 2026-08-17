@@ -1,22 +1,5 @@
-<div class="ml-library">
-  <header class="ml-library__header">
-    <h1>Static Assets</h1>
-    <p class="ml-library__count"><%= @assets.size %> asset<%= "s" unless @assets.size == 1 %></p>
-    <p><%= link_to "Media Library", images_path, class: "ml-btn" %></p>
-  </header>
-
-  <% if @assets.empty? %>
-    <p class="ml-empty">No static assets have been configured by this host application.</p>
-  <% else %>
-    <div class="ml-grid">
-      <% @assets.each do |asset| %>
-        <a class="ml-tile" href="<%= asset[:url] %>">
-          <% if asset[:content_type].to_s.start_with?("image/") %>
-            <img src="<%= asset[:url] %>" alt="<%= asset[:filename] %>" loading="lazy">
-          <% end %>
-          <span class="ml-tile__name"><%= asset[:filename] %></span>
-        </a>
-      <% end %>
-    </div>
-  <% end %>
-</div>
+<%= render "venus_media_library/shared/host_assets",
+           title: "Static Assets",
+           assets: @assets,
+           active_tab: :static,
+           empty_message: "No static assets have been configured by this host application." %>

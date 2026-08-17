@@ -57,6 +57,11 @@ module VenusMediaLibrary
     # :content_type and :byte_size. The engine never scans host directories.
     attr_accessor :static_assets
 
+    # Controller-context callback returning approved cloud asset hashes supplied
+    # by the host. This has the same shape as `static_assets` and intentionally
+    # does not enumerate a cloud bucket or expose storage-provider credentials.
+    attr_accessor :cloud_assets
+
     def initialize
       @allowed_content_types = %w[image/png image/jpeg image/jpg image/gif image/webp image/svg+xml]
       @thumbnail_size        = [ 300, 300 ]
@@ -70,6 +75,7 @@ module VenusMediaLibrary
       @asset_scope           = ->(scope) { scope }
       @legacy_blob_scope     = ->(scope) { scope.none }
       @static_assets         = -> { [] }
+      @cloud_assets          = -> { [] }
     end
   end
 

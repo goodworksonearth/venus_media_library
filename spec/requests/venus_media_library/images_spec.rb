@@ -9,10 +9,12 @@ module VenusMediaLibrary
       original_content_types = configuration.allowed_content_types
       original_max_file_size = configuration.max_file_size
       original_static_assets = configuration.static_assets
+      original_cloud_assets = configuration.cloud_assets
       example.run
       configuration.allowed_content_types = original_content_types
       configuration.max_file_size = original_max_file_size
       configuration.static_assets = original_static_assets
+      configuration.cloud_assets = original_cloud_assets
     end
 
     def create_image_asset(owner: member, filename: "existing.png", content_type: "image/png", community_shared: false)
@@ -31,7 +33,7 @@ module VenusMediaLibrary
         get "/venus_media_library", headers: venus_media_headers(member)
 
         expect(response).to have_http_status(:ok)
-        expect(response.body).to include("Media Library", "library.png")
+        expect(response.body).to include("Media Library", "library.png", "My Library", "Community", "Static Assets", "Cloud Assets")
         expect(response.body).to include("venus_media_library/application", "venus_media_library/picker", "venus_media_library/venus_media_library")
       end
     end
@@ -94,6 +96,33 @@ module VenusMediaLibrary
 
         expect(response).to have_http_status(:ok)
         expect(JSON.parse(response.body)["assets"]).to include("filename" => "brand.svg", "url" => "/assets/brand.svg", "content_type" => "image/svg+xml")
+      end
+    end
+
+    describe "GET /venus_media_library/community_assets" do
+      it "lists only tenant-scoped assets explicitly shared with the community" do
+        shared = create_image_asset(owner: Widget.create!(name: "other"), filename: "shared.png", community_shared: true)
+        private_asset = create_image_asset(owner: Widget.create!(name: "private-owner"), filename: "private.png")
+
+        get "/venus_media_library/community_assets.json", headers: venus_media_headers(member)
+
+        ids = JSON.parse(response.body)["images"].map { |image| image["id"] }
+        expect(ids).to include(shared.id)
+        expect(ids).not_to include(private_asset.id)
+      end
+    end
+
+    describe "GET /venus_media_library/cloud_assets" do
+      it "lists only host-configured cloud assets" do
+        VenusMediaLibrary.configuration.cloud_assets = lambda do
+          [ { filename: "remote-logo.svg", url: "https://cdn.example.test/remote-logo.svg", content_type: "image/svg+xml" } ]
+        end
+
+        get "/venus_media_library/cloud_assets.json", headers: venus_media_headers(member)
+
+        expect(JSON.parse(response.body)["assets"]).to include(
+          "filename" => "remote-logo.svg", "url" => "https://cdn.example.test/remote-logo.svg", "content_type" => "image/svg+xml"
+        )
       end
     end
 
