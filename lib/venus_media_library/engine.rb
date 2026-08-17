@@ -10,11 +10,17 @@ module VenusMediaLibrary
       end
     end
 
-    # Ensure the engine's JS is discoverable by Propshaft/Sprockets in the host.
+    # Publish explicit host-facing entrypoints for both Sprockets and Propshaft.
+    # Hosts can include these names directly without relying on require_tree.
     initializer "venus_media_library.assets" do |app|
       if app.config.respond_to?(:assets)
         app.config.assets.paths << root.join("app/assets/javascripts")
-        app.config.assets.precompile += %w[venus_media_library/venus_media_library.js]
+        app.config.assets.paths << root.join("app/assets/stylesheets")
+        app.config.assets.precompile += %w[
+          venus_media_library/venus_media_library.js
+          venus_media_library/application.css
+          venus_media_library/picker.css
+        ]
       end
     end
 

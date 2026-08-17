@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html>
-<head>
+  <head>
   <title>Media library</title>
-  <%= csrf_meta_tags %>
-  <%= csp_meta_tag %>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <%= stylesheet_link_tag "venus_media_library/application", "venus_media_library/picker" %>
+    <%= javascript_include_tag "venus_media_library/venus_media_library", defer: true %>
 
   <%= yield :head %>
 
