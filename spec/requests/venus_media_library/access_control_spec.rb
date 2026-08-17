@@ -1,30 +1,27 @@
 require "rails_helper"
 
 module VenusMediaLibrary
-  # The engine exposes an upload/list endpoint, so the host must be able to gate
-  # it (admins only). config.authenticate_with is a proc run in the controller's
-  # context before every action; the host uses it to redirect/deny non-admins.
   RSpec.describe "access control", type: :request do
+    let!(:member) { Widget.create!(name: "member") }
+
     around do |example|
       original = VenusMediaLibrary.configuration.authenticate_with
       example.run
       VenusMediaLibrary.configuration.authenticate_with = original
     end
 
-    it "allows access when no authenticator is configured (default)" do
+    it "requires a current user even when no additional authenticator is configured" do
       VenusMediaLibrary.configuration.authenticate_with = nil
 
       get "/venus_media_library/images.json"
 
-      expect(response).to have_http_status(:ok)
+      expect(response).to have_http_status(:unauthorized)
     end
 
     it "runs the configured authenticator in controller context and can deny" do
-      VenusMediaLibrary.configuration.authenticate_with = lambda do
-        head :forbidden
-      end
+      VenusMediaLibrary.configuration.authenticate_with = -> { head :forbidden }
 
-      get "/venus_media_library/images.json"
+      get "/venus_media_library/images.json", headers: venus_media_headers(member)
 
       expect(response).to have_http_status(:forbidden)
     end

@@ -110,7 +110,7 @@ In an initializer (e.g. `config/initializers/venus_media_library.rb`):
 
 ```ruby
 VenusMediaLibrary.configure do |config|
-  # Content types accepted by the uploader (any image/* is always allowed in the grid).
+  # Content types accepted by the uploader.
   config.allowed_content_types = %w[image/png image/jpeg image/webp image/gif image/svg+xml]
 
   # [width, height] for the grid thumbnail variant.
@@ -123,26 +123,27 @@ VenusMediaLibrary.configure do |config|
   # default service (Disk in dev, S3 in prod, etc.).
   config.storage_service = nil
 
-  # How image URLs are built. :redirect (default) uses rails_blob_url; :proxy
-  # uses rails_storage_proxy_url so images on a PRIVATE bucket in proxy mode are
-  # absolute and publicly fetchable by crawlers (e.g. for an og:image).
+  # Retained for compatibility. Library URLs are authorization-aware engine URLs.
   config.url_type = :redirect
 
   # Optional access gate. A proc run in the engine controller's context before
   # every action, so it can use host helpers (current_user, redirect_to, head,
-  # main_app). Left nil the engine is open — set it to restrict the picker and
-  # upload endpoints to admins:
+  # main_app). Use it for a custom precondition before engine actions:
   #
   #   config.authenticate_with = lambda do
   #     redirect_to main_app.root_path unless current_user&.admin?
   #   end
   config.authenticate_with = nil
+
+  # Ownership defaults to the host application's authentication convention.
+  config.current_user = -> { current_user }
+  config.admin = ->(user) { user.admin? }
 end
 ```
 
 ### Configuration Details
 
-- **`allowed_content_types`** — Restricts uploads to these exact MIME types. The default explicitly includes SVG (`image/svg+xml`). The grid always shows any existing blob with an `image/*` content type regardless.
+- **`allowed_content_types`** — Restricts uploads to these exact MIME types. The default explicitly includes SVG (`image/svg+xml`).
 
 - **`thumbnail_size`** — Array of `[width, height]` for grid thumbnails. Larger values give better preview quality at the cost of image processing overhead and bandwidth.
 
@@ -150,9 +151,11 @@ end
 
 - **`storage_service`** — Active Storage service name (e.g. `:amazon`, `:google`). Leave `nil` to use the host app's default, making the engine truly storage-agnostic. Uploads automatically inherit the configured service.
 
-- **`url_type`** — Controls how image URLs are built:
-  - `:redirect` (default) — `rails_blob_url` returns a temporary redirect URL that points to your storage backend (S3, GCS, etc.). Works for public URLs but blocks crawlers if your bucket is private.
-  - `:proxy` — `rails_storage_proxy_url` returns a proxy URL through Rails, which streams bytes from storage. Useful for private buckets where external crawlers (e.g., social media bots fetching `og:image`) need public, absolute URLs.
+- **`current_user`** — A controller-context callback that returns the signed-in host user. It defaults to `current_user`; every engine endpoint requires it to return a user.
+
+- **`admin`** — A callback that determines whether that user can manage all media. It defaults to `->(user) { user.admin? }`.
+
+- **`url_type`** — Retained for backward-compatible host configuration. Browsing and picker URLs are always protected engine routes, so private uploads are never exposed via an Active Storage signed URL.
 
 - **`authenticate_with`** — A proc that gates access to the engine. Runs before every action in the engine's controller context, so you can call host helpers like `current_user`, `redirect_to`, and `head`. Return nothing to allow, or redirect/deny to block. Example:
   ```ruby
@@ -275,6 +278,14 @@ When testing a host app that uses Media Library, you can:
 2. **Test the engine in isolation** — Use the dummy app to verify the picker opens, uploads work, and pagination handles large image sets.
 
 ## Troubleshooting
+
+### Ownership and community sharing
+
+Each upload is owned by the user returned by `config.current_user` and starts private. A member can browse and download their own uploads; checking **Share with community** during upload makes that item visible to other signed-in members. Admins, as determined by `config.admin`, can browse and download every engine-managed upload.
+
+The engine sends originals and thumbnails through its own authorization-aware routes. Do not use an Active Storage blob URL as a substitute for an engine media URL, because it bypasses the ownership check.
+
+Blobs that existed before the engine was installed have no owner and are intentionally invisible to normal members. Admins can use **Import unowned legacy uploads** from the library to claim an image into their private library, then use the normal community-sharing control if appropriate. Do not expose legacy blobs by direct Active Storage URLs.
 
 ### Thumbnails aren't generating
 

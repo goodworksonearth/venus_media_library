@@ -11,9 +11,7 @@ module VenusMediaLibrary
   #     config.storage_service       = :amazon
   #   end
   class Configuration
-    # Content types accepted by the uploader. Every entry is matched literally;
-    # the index independently shows any existing blob whose content_type starts
-    # with "image/".
+    # Content types accepted by the uploader. Every entry is matched literally.
     attr_accessor :allowed_content_types
 
     # [width, height] used for the grid thumbnail variant.
@@ -27,12 +25,8 @@ module VenusMediaLibrary
     # the engine stays storage-agnostic (Disk in dev, S3 in prod, etc.).
     attr_accessor :storage_service
 
-    # How image URLs in the payload/picker are built:
-    #   :redirect (default) -> rails_blob_url          (302s to the storage URL)
-    #   :proxy              -> rails_storage_proxy_url  (Rails streams the bytes)
-    # Use :proxy when the bucket is private and images must be publicly fetchable
-    # by external crawlers (e.g. an og:image on a private S3 bucket in proxy mode).
-    # Still storage-agnostic: both are Active Storage route helpers.
+    # Retained for compatibility with older host configuration. Library URLs are
+    # always served through authorization-aware engine routes.
     attr_accessor :url_type
 
     # Optional access gate. A proc run in the engine controller's context before
@@ -44,6 +38,10 @@ module VenusMediaLibrary
     #     c.authenticate_with = -> { redirect_to main_app.root_path unless current_user&.admin? }
     #   end
     attr_accessor :authenticate_with
+    # The current signed-in host user and the role predicate. Both callbacks run
+    # in the engine controller context. By default this uses the host's
+    # `current_user` and `current_user.admin?` convention.
+    attr_accessor :current_user, :admin
 
     def initialize
       @allowed_content_types = %w[image/png image/jpeg image/jpg image/gif image/webp image/svg+xml]
@@ -52,6 +50,8 @@ module VenusMediaLibrary
       @storage_service       = nil
       @url_type              = :redirect
       @authenticate_with     = nil
+      @current_user          = -> { current_user }
+      @admin                 = ->(user) { user.admin? }
     end
   end
 

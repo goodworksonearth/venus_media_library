@@ -4,6 +4,16 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.0] - 2026-08-17
+
+### Added
+- Owner-scoped media records with private-by-default uploads and optional
+  community sharing.
+- Host `current_user` and `current_user.admin?` conventions, configurable for
+  applications with a different authentication model.
+- Authorization-aware original and thumbnail delivery routes.
+- A tested Rails compatibility range through the 8.x series.
+
 ## [0.1.1] - 2026-08-17
 
 ### Added

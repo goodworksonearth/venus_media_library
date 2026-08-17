@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_08_16_000001) do
+ActiveRecord::Schema[8.1].define(version: 2026_08_17_190000) do
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
     t.datetime "created_at", null: false
@@ -39,6 +39,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_16_000001) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "venus_media_library_assets", force: :cascade do |t|
+    t.integer "blob_id", null: false
+    t.boolean "community_shared", default: false, null: false
+    t.datetime "created_at", null: false
+    t.integer "owner_id", null: false
+    t.string "owner_type", null: false
+    t.datetime "updated_at", null: false
+    t.index ["blob_id"], name: "index_venus_media_library_assets_on_blob_id", unique: true
+    t.index ["owner_type", "owner_id"], name: "index_venus_media_library_assets_on_owner"
+  end
+
   create_table "widgets", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.string "name"
@@ -47,4 +58,5 @@ ActiveRecord::Schema[8.1].define(version: 2026_08_16_000001) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "venus_media_library_assets", "active_storage_blobs", column: "blob_id"
 end

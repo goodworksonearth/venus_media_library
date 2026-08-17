@@ -14,11 +14,11 @@ module VenusMediaLibrary
       @per_page = per_page
       offset    = (@page - 1) * @per_page
 
-      scope        = image_blobs
+      scope        = visible_media_assets
       @total_count = scope.count
       @blobs       = scope.order(created_at: :desc).offset(offset).limit(@per_page).to_a
       @has_more    = offset + @blobs.size < @total_count
-      @images      = @blobs.map { |blob| ml_image_payload(blob) }
+      @images      = @blobs.map { |asset| ml_image_payload(asset) }
 
       respond_to do |format|
         format.html # index.html.erb
@@ -47,18 +47,21 @@ module VenusMediaLibrary
         content_type: uploaded.content_type,
         service_name: VenusMediaLibrary.configuration.storage_service
       )
+      asset = VenusMediaLibrary::Asset.create!(
+        blob: blob, owner: venus_media_library_user,
+        community_shared: ActiveModel::Type::Boolean.new.cast(params[:community_shared]) || false
+      )
 
       respond_to do |format|
-        format.json { render json: ml_image_payload(blob), status: :created }
+        format.json { render json: ml_image_payload(asset), status: :created }
         format.html { redirect_to images_path }
       end
+    rescue ActiveRecord::RecordInvalid
+      blob&.purge
+      raise
     end
 
     private
-
-    def image_blobs
-      ActiveStorage::Blob.where("content_type LIKE ?", "image/%")
-    end
 
     def per_page
       requested = params[:per_page].presence&.to_i
