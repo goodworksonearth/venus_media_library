@@ -1,0 +1,52 @@
+version: 2.1
+
+orbs:
+  browser-tools: circleci/browser-tools@1.1
+
+jobs:
+  quality:
+    parameters:
+      ruby:
+        type: string
+      rails:
+        type: string
+    docker:
+      - image: cimg/ruby:<< parameters.ruby >>-browsers
+    resource_class: medium
+    environment:
+      BUNDLE_GEMFILE: gemfiles/rails_<< parameters.rails >>.gemfile
+    steps:
+      - checkout
+      - browser-tools/install-browser-tools
+      - run:
+          name: Install dependencies
+          command: |
+            bundle config set path vendor/bundle
+            bundle install --jobs 4 --retry 3
+            bundle clean --force
+      - run:
+          name: Lint code
+          command: bin/rubocop -f progress
+      - run:
+          name: Run test suite
+          command: bundle exec rake app:spec
+      - run:
+          name: Build gem package
+          command: bundle exec gem build venus_media_library.gemspec
+      - run:
+          name: Validate gem package
+          command: gem check venus_media_library-*.gem
+
+workflows:
+  test:
+    jobs:
+      - quality:
+          matrix:
+            parameters:
+              ruby: ["3.2", "3.4"]
+              rails: ["7_1", "8_1"]
+            exclude:
+              - ruby: "3.2"
+                rails: "8_1"
+              - ruby: "3.4"
+                rails: "7_1"
