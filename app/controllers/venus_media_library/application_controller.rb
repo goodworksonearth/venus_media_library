@@ -29,15 +29,21 @@ module VenusMediaLibrary
     end
 
     def visible_media_assets
-      scope = VenusMediaLibrary::Asset.includes(:blob)
+      scope = scoped_media_assets
       return scope if venus_media_library_admin?
 
       scope.where(community_shared: true).or(scope.where(owner: venus_media_library_user))
     end
 
     def unowned_legacy_image_blobs
-      ActiveStorage::Blob.where("content_type LIKE ?", "image/%")
-                         .where.not(id: VenusMediaLibrary::Asset.select(:blob_id))
+      scope = ActiveStorage::Blob.where("content_type LIKE ?", "image/%")
+                                 .where.not(id: VenusMediaLibrary::Asset.select(:blob_id))
+      instance_exec(scope, &VenusMediaLibrary.configuration.legacy_blob_scope)
+    end
+
+    def scoped_media_assets
+      scope = VenusMediaLibrary::Asset.includes(:blob)
+      instance_exec(scope, &VenusMediaLibrary.configuration.asset_scope)
     end
 
     def require_venus_media_library_admin!

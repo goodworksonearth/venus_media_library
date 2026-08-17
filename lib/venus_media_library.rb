@@ -46,6 +46,12 @@ module VenusMediaLibrary
     # `current_user` and `current_user.admin?` convention.
     attr_accessor :current_user, :admin
 
+    # Controller-context callbacks that narrow the engine's records for a host
+    # tenant. Each receives an Active Record relation and must return a relation.
+    # Legacy blobs default to none because they have no owner and may belong to
+    # another tenant.
+    attr_accessor :asset_scope, :legacy_blob_scope
+
     def initialize
       @allowed_content_types = %w[image/png image/jpeg image/jpg image/gif image/webp image/svg+xml]
       @thumbnail_size        = [ 300, 300 ]
@@ -56,6 +62,8 @@ module VenusMediaLibrary
       @authenticate_with     = nil
       @current_user          = -> { current_user }
       @admin                 = ->(user) { user.admin? }
+      @asset_scope           = ->(scope) { scope }
+      @legacy_blob_scope     = ->(scope) { scope.none }
     end
   end
 

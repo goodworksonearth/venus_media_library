@@ -18,6 +18,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Validate detected upload MIME types, require the declared type to match, and
   enforce a configurable size limit.
 - Deliver SVG originals as attachments instead of inline documents.
+- Add configurable asset and legacy-blob tenant scopes; legacy blobs are denied
+  by default until explicitly scoped by the host.
 
 ## [0.1.1] - 2026-08-17
 

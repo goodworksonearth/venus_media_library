@@ -141,6 +141,7 @@ VenusMediaLibrary.configure do |config|
   # Ownership defaults to the host application's authentication convention.
   config.current_user = -> { current_user }
   config.admin = ->(user) { user.admin? }
+
 end
 ```
 
@@ -159,6 +160,10 @@ end
 - **`current_user`** — A controller-context callback that returns the signed-in host user. It defaults to `current_user`; every engine endpoint requires it to return a user.
 
 - **`admin`** — A callback that determines whether that user can manage all media. It defaults to `->(user) { user.admin? }`.
+
+- **`asset_scope`** — A controller-context callback receiving the engine asset relation. Use it to restrict all list, picker, download, and admin queries to the current tenant. It defaults to the supplied relation.
+
+- **`legacy_blob_scope`** — A controller-context callback receiving unowned image blobs. It defaults to `scope.none`, so legacy blobs cannot cross tenant boundaries accidentally. Configure it explicitly only when the host can prove which legacy blobs belong to the current tenant.
 
 - **`url_type`** — Retained for backward-compatible host configuration. Browsing and picker URLs are always protected engine routes, so private uploads are never exposed via an Active Storage signed URL.
 

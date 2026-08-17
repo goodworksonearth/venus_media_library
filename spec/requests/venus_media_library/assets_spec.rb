@@ -5,6 +5,16 @@ module VenusMediaLibrary
     let!(:owner) { Widget.create!(name: "owner") }
     let!(:member) { Widget.create!(name: "member") }
 
+    around do |example|
+      configuration = VenusMediaLibrary.configuration
+      original_asset_scope = configuration.asset_scope
+      original_legacy_blob_scope = configuration.legacy_blob_scope
+      example.run
+    ensure
+      configuration.asset_scope = original_asset_scope
+      configuration.legacy_blob_scope = original_legacy_blob_scope
+    end
+
     def create_asset(owner: self.owner, community_shared: false)
       blob = ActiveStorage::Blob.create_and_upload!(
         io: File.open(VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.png")),
@@ -44,6 +54,8 @@ module VenusMediaLibrary
       get "/venus_media_library/legacy_assets.json", headers: venus_media_headers(member)
       expect(response).to have_http_status(:forbidden)
 
+      VenusMediaLibrary.configuration.legacy_blob_scope = ->(scope) { scope }
+
       get "/venus_media_library/legacy_assets.json", headers: venus_media_headers(member, admin: true)
       expect(response).to have_http_status(:ok)
       expect(JSON.parse(response.body)["images"].map { |image| image["id"] }).to include(blob.id)
@@ -51,6 +63,31 @@ module VenusMediaLibrary
       post "/venus_media_library/legacy_assets/#{blob.id}/import.json", headers: venus_media_headers(member, admin: true)
       expect(response).to have_http_status(:created)
       expect(VenusMediaLibrary::Asset.find_by(blob: blob)&.owner).to eq(member)
+    end
+
+    it "does not expose unowned legacy blobs until the host explicitly scopes them in" do
+      ActiveStorage::Blob.create_and_upload!(
+        io: File.open(VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.png")),
+        filename: "legacy.png", content_type: "image/png"
+      )
+
+      get "/venus_media_library/legacy_assets.json", headers: venus_media_headers(member, admin: true)
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)["images"]).to be_empty
+    end
+
+    it "applies the host asset scope before a member sees shared assets" do
+      permitted = create_asset(owner: owner, community_shared: true)
+      hidden = create_asset(owner: Widget.create!(name: "other"), community_shared: true)
+      permitted_owner = owner
+      VenusMediaLibrary.configuration.asset_scope = ->(scope) { scope.where(owner: permitted_owner) }
+
+      get "/venus_media_library/images.json", headers: venus_media_headers(member)
+
+      ids = JSON.parse(response.body)["images"].map { |image| image["id"] }
+      expect(ids).to include(permitted.id)
+      expect(ids).not_to include(hidden.id)
     end
 
     it "delivers SVG originals as attachments rather than inline documents" do
