@@ -2,12 +2,12 @@
 
 A mountable Rails engine that turns **Active Storage** into a browsable media library with an **image picker**.
 
-Content editors get a modal that lists every image already in Active Storage and lets them upload new ones. Drop `media_picker_field` next to any URL field (for example an `og:image` field) so editors *select* an image instead of typing a path.
+Content editors get a modal that lists authorized engine media and lets them upload new ones. Drop `media_picker_field` next to any URL field (for example an `og:image` field) so editors *select* an image instead of typing a path.
 
 It is **storage-agnostic**: it uses whatever Active Storage service the host app configures — local Disk in development, Amazon S3 (or GCS, Azure, ...) in production. The engine never talks to a storage backend directly.
 
 - Namespaced under `VenusMediaLibrary::` (isolated engine)
-- Lists `ActiveStorage::Blob` records with an `image/*` content type, newest first
+- Lists owner-scoped Active Storage media records, newest first
 - HTML thumbnail grid **and** a JSON API
 - Upload via `ActiveStorage::Blob.create_and_upload!`
 - A modal picker (Turbo Frame + dependency-free vanilla JS)
@@ -28,6 +28,15 @@ bundle install
 ```
 
 Active Storage must be installed in the host app (`bin/rails active_storage:install && bin/rails db:migrate`).
+
+### Compatibility
+
+| Component | Supported |
+| --- | --- |
+| Ruby | 3.2+ |
+| Rails | 7.1 through 8.x |
+| Database | Any host-supported Active Record database |
+| Assets | Propshaft or Sprockets |
 
 ## Mount the engine
 
@@ -80,6 +89,12 @@ chosen — so submitting the form without picking never detaches the current fil
 accepts a `signed_id` natively, so no controller changes are needed beyond
 permitting the attachment param (e.g. `params.permit(:cover)`).
 
+### Choosing URL or attachment mode
+
+Use `media_picker_field` for a string URL column and `media_attach_field` for
+a `has_one_attached` association. Both modes require host authorization; the
+attachment mode also requires permitting the attachment parameter.
+
 ### `media_picker_field` options
 
 | Option | Default | Description |
@@ -101,6 +116,7 @@ Mounted at your chosen path (examples assume `/venus_media_library`):
 | `GET` | `/venus_media_library/images.json` | `{ images: [...], page:, has_more:, total: }` |
 | `POST` | `/venus_media_library/images` | Upload a file (param `file`); returns the image JSON |
 | `GET` | `/venus_media_library/picker?target=<input_id>` | Turbo Frame body for the modal |
+| `GET` | `/venus_media_library/static_assets` | Host-configured static-asset page (also `.json`) |
 
 Each image payload includes `id`, `signed_id`, `filename`, `content_type`, `byte_size`, `url`, and `thumb_url`.
 
@@ -262,9 +278,9 @@ If you must support IE11, you'll need polyfills. No Turbo Drive requirement, but
    - **Upload:** Click the upload button; JavaScript posts the file to `POST /venus_media_library/images`, attaches the new blob to the same inputs, and reloads the grid.
 4. **Form submission** — The host app form submits with the image data, storing it as a URL column or Active Storage attachment.
 
-### URL Signing & Storage Agnosticism
+### Authorized delivery & storage agnosticism
 
-All image URLs are built via Active Storage helpers (`rails_blob_url` or `rails_storage_proxy_url`), which handle signed URLs and expiration. The engine never directly accesses the storage backend; it trusts Active Storage to route the request appropriately.
+The engine serves library URLs through authorization-aware routes. It never directly accesses the storage backend; Active Storage routes the authorized byte requests.
 
 Upload destinations are determined by `config.storage_service` — if `nil`, the host app's default service is used, allowing per-environment configuration (Disk locally, S3 in production).
 
@@ -317,12 +333,6 @@ Blobs that existed before the engine was installed have no owner and are intenti
 rails active_storage:install && rails db:migrate
 ```
 
-### Private S3 bucket — og:image not visible to crawlers
-
-**Symptom:** Social media preview cards show no image for posts with private S3 URLs.
-
-**Solution:** Set `config.url_type = :proxy` so Rails proxies image bytes through a public endpoint. This requires Rails to stream the file, so monitor for performance impact with large images.
-
 ### Upload endpoint is open to the public
 
 **Symptom:** Anyone can upload images to your media library.
@@ -368,7 +378,7 @@ gem build venus_media_library.gemspec        # produces venus_media_library-<ver
 gem push venus_media_library-<version>.gem   # publish to RubyGems
 ```
 
-`gem push` requires RubyGems credentials (and 2FA/OTP if enabled) — **the gem owner enters these**; they are not stored in the repo. Bump `VenusMediaLibrary::VERSION` in `lib/venus_media_library/version.rb` before each release.
+Follow [the release guide](docs/RELEASING.md). `gem push` requires RubyGems credentials (and 2FA/OTP if enabled) — **the gem owner enters these**; they are not stored in the repo. Bump `VenusMediaLibrary::VERSION` in `lib/venus_media_library/version.rb` before each release.
 
 ## License
 
