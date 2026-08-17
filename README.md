@@ -378,7 +378,10 @@ gem build venus_media_library.gemspec        # produces venus_media_library-<ver
 gem push venus_media_library-<version>.gem   # publish to RubyGems
 ```
 
-Follow [the release guide](docs/RELEASING.md). `gem push` requires RubyGems credentials (and 2FA/OTP if enabled) — **the gem owner enters these**; they are not stored in the repo. Bump `VenusMediaLibrary::VERSION` in `lib/venus_media_library/version.rb` before each release.
+Follow [the release guide](docs/RELEASING.md). Releases normally use GitHub
+Actions trusted publishing; no RubyGems token is stored in the repository or
+GitHub secrets. Bump `VenusMediaLibrary::VERSION` in
+`lib/venus_media_library/version.rb` before each release.
 
 ## License
 
