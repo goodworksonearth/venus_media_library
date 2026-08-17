@@ -14,6 +14,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Authorization-aware original and thumbnail delivery routes.
 - A tested Rails compatibility range through the 8.x series.
 
+### Security
+- Validate detected upload MIME types, require the declared type to match, and
+  enforce a configurable size limit.
+- Deliver SVG originals as attachments instead of inline documents.
+
 ## [0.1.1] - 2026-08-17
 
 ### Added

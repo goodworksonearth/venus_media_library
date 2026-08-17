@@ -3,7 +3,7 @@ module VenusMediaLibrary
     def show
       asset = visible_media_assets.find(params[:id])
       send_data asset.blob.download, filename: asset.blob.filename.to_s,
-        type: asset.blob.content_type, disposition: "inline"
+        type: asset.blob.content_type, disposition: delivery_disposition(asset.blob)
     end
 
     def thumbnail
@@ -15,6 +15,14 @@ module VenusMediaLibrary
       representation = blob.variant(resize_to_limit: [ width, height ]).processed
       send_data representation.download, filename: blob.filename.to_s,
         type: representation.image.content_type, disposition: "inline"
+    end
+
+    private
+
+    # SVG is accepted for editorial use but is delivered as a download. Inline
+    # SVG may execute active content in a host application's origin.
+    def delivery_disposition(blob)
+      blob.content_type == "image/svg+xml" ? "attachment" : "inline"
     end
   end
 end

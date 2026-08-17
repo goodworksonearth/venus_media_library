@@ -52,5 +52,18 @@ module VenusMediaLibrary
       expect(response).to have_http_status(:created)
       expect(VenusMediaLibrary::Asset.find_by(blob: blob)&.owner).to eq(member)
     end
+
+    it "delivers SVG originals as attachments rather than inline documents" do
+      blob = ActiveStorage::Blob.create_and_upload!(
+        io: File.open(VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.svg")),
+        filename: "logo.svg", content_type: "image/svg+xml"
+      )
+      asset = VenusMediaLibrary::Asset.create!(blob: blob, owner: owner)
+
+      get "/venus_media_library/assets/#{asset.id}", headers: venus_media_headers(owner)
+
+      expect(response).to have_http_status(:ok)
+      expect(response.headers["Content-Disposition"]).to start_with("attachment")
+    end
   end
 end
