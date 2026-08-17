@@ -8,6 +8,7 @@ VenusMediaLibrary::Engine.routes.draw do
     get :thumbnail, on: :member
     post :import, on: :member
   end
+  resources :static_assets, only: [ :index ]
 
   # Turbo Frame that renders the picker modal body for a given target field.
   get "picker", to: "pickers#show", as: :picker

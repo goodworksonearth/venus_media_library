@@ -8,9 +8,11 @@ module VenusMediaLibrary
       configuration = VenusMediaLibrary.configuration
       original_content_types = configuration.allowed_content_types
       original_max_file_size = configuration.max_file_size
+      original_static_assets = configuration.static_assets
       example.run
       configuration.allowed_content_types = original_content_types
       configuration.max_file_size = original_max_file_size
+      configuration.static_assets = original_static_assets
     end
 
     def create_image_asset(owner: member, filename: "existing.png", content_type: "image/png", community_shared: false)
@@ -79,6 +81,19 @@ module VenusMediaLibrary
         get "/venus_media_library/images.json"
 
         expect(response).to have_http_status(:unauthorized)
+      end
+    end
+
+    describe "GET /venus_media_library/static_assets" do
+      it "lists only host-configured static assets" do
+        VenusMediaLibrary.configuration.static_assets = lambda do
+          [ { filename: "brand.svg", url: "/assets/brand.svg", content_type: "image/svg+xml" } ]
+        end
+
+        get "/venus_media_library/static_assets.json", headers: venus_media_headers(member)
+
+        expect(response).to have_http_status(:ok)
+        expect(JSON.parse(response.body)["assets"]).to include("filename" => "brand.svg", "url" => "/assets/brand.svg", "content_type" => "image/svg+xml")
       end
     end
 
