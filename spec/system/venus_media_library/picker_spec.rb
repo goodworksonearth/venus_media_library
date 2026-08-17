@@ -24,7 +24,9 @@ RSpec.describe "media picker", type: :system do
 
     click_button "Choose media"
     expect(page).to have_css(".ml-tile", text: "existing.png")
-    attach_file "image-upload", VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.png"), make_visible: true
+    find("#image-upload", visible: :all).set(
+      VenusMediaLibrary::Engine.root.join("spec/fixtures/files/sample.png")
+    )
     expect(page).to have_css(".ml-tile", count: 2)
 
     page.send_keys(:escape)

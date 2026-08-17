@@ -9,7 +9,7 @@ jobs:
   release:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
       id-token: write
     environment: release
     steps:
@@ -24,5 +24,22 @@ jobs:
           ruby-version: ruby
           bundler-cache: true
 
+      - name: Verify tag matches gem version
+        run: |
+          version="$(ruby -Ilib -rvenus_media_library/version -e 'print VenusMediaLibrary::VERSION')"
+          test "$GITHUB_REF_NAME" = "v$version"
+
+      - name: Run test suite
+        run: bundle exec rake app:spec
+
+      - name: Build gem package
+        run: bundle exec gem build venus_media_library.gemspec
+
+      - name: Validate gem package
+        run: gem check "venus_media_library-${GITHUB_REF_NAME#v}.gem"
+
+      - name: Configure RubyGems trusted publishing
+        uses: rubygems/configure-rubygems-credentials@dc5a8d8553e6ee01fc26761a49e99e733d17954a # v2.1.0
+
       - name: Publish to RubyGems
-        uses: rubygems/release-gem@v1
+        run: gem push "venus_media_library-${GITHUB_REF_NAME#v}.gem"

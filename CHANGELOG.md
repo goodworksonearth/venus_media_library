@@ -4,6 +4,23 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-08-17
+
+### Added
+- A stable, documented public release of the mountable Rails media-library
+  engine, including private-by-default owner access, optional community sharing,
+  administrator imports, and tenant-aware scopes.
+- Browsable library and separate host-configured Static Assets pages at the
+  engine mount point.
+- A headless Chrome system test covering picker open, existing-image selection,
+  upload, and Escape-to-close behavior.
+- CI coverage for Ruby 3.2/Rails 7.1 and Ruby 3.4/Rails 8.1, plus contributor,
+  security, and release documentation.
+
+### Security
+- Trusted RubyGems publishing through the tag-triggered GitHub OIDC workflow;
+  the required publisher configuration is documented in `docs/RELEASING.md`.
+
 ## [0.2.0] - 2026-08-17
 
 ### Added

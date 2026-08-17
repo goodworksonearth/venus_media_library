@@ -10,7 +10,8 @@
 5. Before the first trusted release, configure the RubyGems trusted publisher
    for GitHub Actions with owner `goodworksonearth`, repository
    `venus_media_library`, workflow `release.yml`, and environment `release`.
-6. The workflow publishes with short-lived OIDC credentials. Never put a
+6. The workflow verifies that the tag matches the gem version, tests, builds,
+   validates, and publishes with short-lived OIDC credentials. Never put a
    RubyGems API key in the repository or GitHub secret once this path has been
    proven by a release.
 7. Create the GitHub Release and verify the new version on RubyGems and in a
