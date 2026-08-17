@@ -165,6 +165,8 @@ end
 
 - **`legacy_blob_scope`** — A controller-context callback receiving unowned image blobs. It defaults to `scope.none`, so legacy blobs cannot cross tenant boundaries accidentally. Configure it explicitly only when the host can prove which legacy blobs belong to the current tenant.
 
+- **`static_assets`** — A controller-context callback that returns approved host asset hashes for the separate `/static_assets` page. Each hash needs `filename` and `url`, with optional `content_type` and `byte_size`; the engine never scans host directories.
+
 - **`url_type`** — Retained for backward-compatible host configuration. Browsing and picker URLs are always protected engine routes, so private uploads are never exposed via an Active Storage signed URL.
 
 - **`authenticate_with`** — A proc that gates access to the engine. Runs before every action in the engine's controller context, so you can call host helpers like `current_user`, `redirect_to`, and `head`. Return nothing to allow, or redirect/deny to block. Example:

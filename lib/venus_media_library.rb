@@ -52,6 +52,11 @@ module VenusMediaLibrary
     # another tenant.
     attr_accessor :asset_scope, :legacy_blob_scope
 
+    # Controller-context callback returning static asset hashes supplied by the
+    # host. Each hash should include :filename and :url, with optional
+    # :content_type and :byte_size. The engine never scans host directories.
+    attr_accessor :static_assets
+
     def initialize
       @allowed_content_types = %w[image/png image/jpeg image/jpg image/gif image/webp image/svg+xml]
       @thumbnail_size        = [ 300, 300 ]
@@ -64,6 +69,7 @@ module VenusMediaLibrary
       @admin                 = ->(user) { user.admin? }
       @asset_scope           = ->(scope) { scope }
       @legacy_blob_scope     = ->(scope) { scope.none }
+      @static_assets         = -> { [] }
     end
   end
 
