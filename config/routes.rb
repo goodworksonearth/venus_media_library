@@ -1,4 +1,4 @@
-MediaLibrary::Engine.routes.draw do
+VenusMediaLibrary::Engine.routes.draw do
   # Image library: index lists images (HTML grid + JSON), create handles uploads.
   resources :images, only: [ :index, :create ]
 

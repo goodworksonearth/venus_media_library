@@ -22,7 +22,7 @@ RSpec.configure do |config|
   config.infer_spec_type_from_file_location!
   config.filter_rails_from_backtrace!
 
-  # Route requests at the engine so `media_library_engine` helpers resolve and
+  # Route requests at the engine so `venus_media_library_engine` helpers resolve and
   # request specs hit the mounted routes.
   config.include Rails.application.routes.url_helpers
 

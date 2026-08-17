@@ -7,11 +7,11 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ## [0.1.0] - 2026-08-15
 
 ### Added
-- Mountable, isolated Rails engine namespaced under `MediaLibrary`.
-- `MediaLibrary::ImagesController` — `index` (HTML grid + JSON) listing `image/*`
+- Mountable, isolated Rails engine namespaced under `VenusMediaLibrary`.
+- `VenusMediaLibrary::ImagesController` — `index` (HTML grid + JSON) listing `image/*`
   Active Storage blobs newest-first with simple pagination, and `create` for
   uploads via `ActiveStorage::Blob.create_and_upload!` (storage-agnostic).
-- `MediaLibrary::PickersController` — Turbo Frame picker body for a target field.
+- `VenusMediaLibrary::PickersController` — Turbo Frame picker body for a target field.
 - `media_picker_field` host helper (auto-included into host views) that renders a
   URL text input plus a "Choose from library" button and a shared modal shell.
 - Dependency-free vanilla JS picker (opens the modal, selects an image, uploads).
@@ -27,5 +27,5 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   before every action, so the host can gate the picker/upload endpoints (admins
   only). The engine ships open.
 - Configurable allowed content types, thumbnail size, per-page count, and storage
-  service via `MediaLibrary.configure`.
+  service via `VenusMediaLibrary.configure`.
 - Dummy app + RSpec request, model, and helper specs.

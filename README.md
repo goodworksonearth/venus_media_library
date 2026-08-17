@@ -6,7 +6,7 @@ Content editors get a modal that lists every image already in Active Storage and
 
 It is **storage-agnostic**: it uses whatever Active Storage service the host app configures — local Disk in development, Amazon S3 (or GCS, Azure, ...) in production. The engine never talks to a storage backend directly.
 
-- Namespaced under `MediaLibrary::` (isolated engine)
+- Namespaced under `VenusMediaLibrary::` (isolated engine)
 - Lists `ActiveStorage::Blob` records with an `image/*` content type, newest first
 - HTML thumbnail grid **and** a JSON API
 - Upload via `ActiveStorage::Blob.create_and_upload!`
@@ -18,7 +18,7 @@ It is **storage-agnostic**: it uses whatever Active Storage service the host app
 Add it to the host app's `Gemfile`:
 
 ```ruby
-gem "media_library"
+gem "venus_media_library"
 ```
 
 Then:
@@ -34,18 +34,18 @@ Active Storage must be installed in the host app (`bin/rails active_storage:inst
 In the host app's `config/routes.rb`:
 
 ```ruby
-mount MediaLibrary::Engine, at: "/media"
+mount VenusMediaLibrary::Engine, at: "/media"
 ```
 
 Include the picker JavaScript once in your layout (Propshaft/Sprockets):
 
 ```erb
-<%= javascript_include_tag "media_library/media_library", defer: true %>
+<%= javascript_include_tag "venus_media_library/venus_media_library", defer: true %>
 ```
 
-(Using importmap? `pin "media_library", to: "media_library/media_library.js"` and `import "media_library"`.)
+(Using importmap? `pin "venus_media_library", to: "venus_media_library/venus_media_library.js"` and `import "venus_media_library"`.)
 
-The picker styles are shipped as `media_library/application.css`; require them or add your own — every class is namespaced under `.ml-*`.
+The picker styles are shipped as `venus_media_library/application.css`; require them or add your own — every class is namespaced under `.ml-*`.
 
 ## Usage
 
@@ -105,10 +105,10 @@ Each image payload includes `id`, `signed_id`, `filename`, `content_type`, `byte
 
 ## Configuration
 
-In an initializer (e.g. `config/initializers/media_library.rb`):
+In an initializer (e.g. `config/initializers/venus_media_library.rb`):
 
 ```ruby
-MediaLibrary.configure do |config|
+VenusMediaLibrary.configure do |config|
   # Content types accepted by the uploader (any image/* is always allowed in the grid).
   config.allowed_content_types = %w[image/png image/jpeg image/webp image/gif image/svg+xml]
 
@@ -160,11 +160,11 @@ bundle exec rspec                               # run the test suite
 This gem is built to be published to RubyGems under a **Good Works On Earth** name.
 
 ```bash
-gem build media_library.gemspec        # produces media_library-<version>.gem
-gem push media_library-<version>.gem   # publish to RubyGems
+gem build venus_media_library.gemspec        # produces venus_media_library-<version>.gem
+gem push venus_media_library-<version>.gem   # publish to RubyGems
 ```
 
-`gem push` requires RubyGems credentials (and 2FA/OTP if enabled) — **the gem owner enters these**; they are not stored in the repo. Bump `MediaLibrary::VERSION` in `lib/media_library/version.rb` before each release.
+`gem push` requires RubyGems credentials (and 2FA/OTP if enabled) — **the gem owner enters these**; they are not stored in the repo. Bump `VenusMediaLibrary::VERSION` in `lib/venus_media_library/version.rb` before each release.
 
 ## License
 

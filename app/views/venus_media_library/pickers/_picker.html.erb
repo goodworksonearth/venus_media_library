@@ -1,0 +1,27 @@
+<%# Picker body loaded into the modal as a Turbo Frame. `target` is the id of the
+    host input to receive the chosen image. %>
+<turbo-frame id="venus_media_library_picker" class="ml-picker" data-ml-target="<%= target %>">
+  <div class="ml-picker__toolbar">
+    <label class="ml-btn ml-btn--primary">
+      Upload image
+      <input type="file" accept="image/*" hidden data-ml-upload>
+    </label>
+    <span class="ml-picker__hint" data-ml-status></span>
+  </div>
+
+  <% if images.empty? %>
+    <p class="ml-empty">No images yet. Upload one above.</p>
+  <% else %>
+    <div class="ml-grid" data-ml-grid>
+      <%= render partial: "venus_media_library/images/image", collection: images, as: :image %>
+    </div>
+  <% end %>
+
+  <% if has_more %>
+    <div class="ml-picker__more">
+      <a href="<%= picker_path(target: target, page: page + 1) %>"
+         data-turbo-frame="venus_media_library_picker"
+         class="ml-btn">Load older</a>
+    </div>
+  <% end %>
+</turbo-frame>

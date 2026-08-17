@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-# Specify your gem's dependencies in media_library.gemspec.
+# Specify your gem's dependencies in venus_media_library.gemspec.
 gemspec
 
 gem "puma"

@@ -10,12 +10,12 @@ default: &default
 
 development:
   <<: *default
-  database: media_library_dummy_development
+  database: venus_media_library_dummy_development
 
 test:
   <<: *default
-  database: media_library_dummy_test
+  database: venus_media_library_dummy_test
 
 production:
   <<: *default
-  database: media_library_dummy_production
+  database: venus_media_library_dummy_production
