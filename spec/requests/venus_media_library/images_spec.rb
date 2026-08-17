@@ -30,6 +30,7 @@ module VenusMediaLibrary
 
         expect(response).to have_http_status(:ok)
         expect(response.body).to include("Media Library", "library.png")
+        expect(response.body).to include("venus_media_library/application", "venus_media_library/picker", "venus_media_library/venus_media_library")
       end
     end
 

@@ -190,6 +190,13 @@ Without these, variant generation fails and thumbnail images won't display.
 
 ## Styling & Customization
 
+Include the engine's explicit entrypoints in the host layout:
+
+```erb
+<%= stylesheet_link_tag "venus_media_library/application", "venus_media_library/picker" %>
+<%= javascript_include_tag "venus_media_library/venus_media_library", defer: true %>
+```
+
 All picker and library CSS is namespaced under `.ml-*` classes to avoid conflicts with the host app. The engine ships two stylesheets:
 
 - **`venus_media_library/application.css`** — Layout and structure (grid, pagination, forms).
