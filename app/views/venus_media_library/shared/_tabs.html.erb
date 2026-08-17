@@ -1,0 +1,6 @@
+<nav class="ml-tabs" aria-label="Media library views">
+  <%= link_to "My Library", images_path, class: "ml-tabs__tab", aria: { current: active_tab == :library ? "page" : nil } %>
+  <%= link_to "Community", community_assets_path, class: "ml-tabs__tab", aria: { current: active_tab == :community ? "page" : nil } %>
+  <%= link_to "Static Assets", static_assets_path, class: "ml-tabs__tab", aria: { current: active_tab == :static ? "page" : nil } %>
+  <%= link_to "Cloud Assets", cloud_assets_path, class: "ml-tabs__tab", aria: { current: active_tab == :cloud ? "page" : nil } %>
+</nav>

@@ -1,7 +1,7 @@
 module VenusMediaLibrary
-  class StaticAssetsController < ApplicationController
+  class CloudAssetsController < ApplicationController
     def index
-      load_host_assets(VenusMediaLibrary.configuration.static_assets)
+      load_host_assets(VenusMediaLibrary.configuration.cloud_assets)
 
       respond_to do |format|
         format.html

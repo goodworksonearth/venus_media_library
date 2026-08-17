@@ -1,0 +1,23 @@
+<div class="ml-library">
+  <header class="ml-library__header">
+    <h1><%= title %></h1>
+    <p class="ml-library__count"><%= assets.size %> asset<%= "s" unless assets.size == 1 %></p>
+  </header>
+
+  <%= render "venus_media_library/shared/tabs", active_tab: active_tab %>
+
+  <% if assets.empty? %>
+    <p class="ml-empty"><%= empty_message %></p>
+  <% else %>
+    <div class="ml-grid">
+      <% assets.each do |asset| %>
+        <a class="ml-tile" href="<%= asset[:url] %>">
+          <% if asset[:content_type].to_s.start_with?("image/") %>
+            <img src="<%= asset[:url] %>" alt="<%= asset[:filename] %>" loading="lazy">
+          <% end %>
+          <span class="ml-tile__name"><%= asset[:filename] %></span>
+        </a>
+      <% end %>
+    </div>
+  <% end %>
+</div>

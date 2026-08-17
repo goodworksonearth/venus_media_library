@@ -10,15 +10,7 @@ module VenusMediaLibrary
     # Lists image blobs, newest first, with simple offset pagination.
     # Responds with an HTML grid or a JSON payload for the picker.
     def index
-      @page     = [ params.fetch(:page, 1).to_i, 1 ].max
-      @per_page = per_page
-      offset    = (@page - 1) * @per_page
-
-      scope        = visible_media_assets
-      @total_count = scope.count
-      @blobs       = scope.order(created_at: :desc).offset(offset).limit(@per_page).to_a
-      @has_more    = offset + @blobs.size < @total_count
-      @images      = @blobs.map { |asset| ml_image_payload(asset) }
+      load_media_assets(visible_media_assets)
 
       respond_to do |format|
         format.html # index.html.erb
@@ -61,13 +53,6 @@ module VenusMediaLibrary
     end
 
     private
-
-    def per_page
-      requested = params[:per_page].presence&.to_i
-      value = requested&.positive? ? requested : VenusMediaLibrary.configuration.per_page.to_i
-
-      value.clamp(1, MAX_PER_PAGE)
-    end
 
     def allowed_content_type?(content_type)
       return false if content_type.blank?
