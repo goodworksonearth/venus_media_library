@@ -1,0 +1,5 @@
+<h1>Picker demo</h1>
+
+<%= form_with model: @widget, url: "#" do |form| %>
+  <%= media_picker_field form, :name, label: "Choose media" %>
+<% end %>
