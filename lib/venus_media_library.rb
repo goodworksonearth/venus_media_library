@@ -20,6 +20,9 @@ module VenusMediaLibrary
     # Number of images per page in the index.
     attr_accessor :per_page
 
+    # Maximum accepted upload size in bytes.
+    attr_accessor :max_file_size
+
     # Optional Active Storage service name to attach uploads to. When nil the
     # host app's default service (`config.active_storage.service`) is used, so
     # the engine stays storage-agnostic (Disk in dev, S3 in prod, etc.).
@@ -47,6 +50,7 @@ module VenusMediaLibrary
       @allowed_content_types = %w[image/png image/jpeg image/jpg image/gif image/webp image/svg+xml]
       @thumbnail_size        = [ 300, 300 ]
       @per_page              = 40
+      @max_file_size         = 10 * 1024 * 1024
       @storage_service       = nil
       @url_type              = :redirect
       @authenticate_with     = nil

@@ -5,9 +5,12 @@ module VenusMediaLibrary
     let!(:member) { Widget.create!(name: "member") }
 
     around do |example|
-      original = VenusMediaLibrary.configuration.allowed_content_types
+      configuration = VenusMediaLibrary.configuration
+      original_content_types = configuration.allowed_content_types
+      original_max_file_size = configuration.max_file_size
       example.run
-      VenusMediaLibrary.configuration.allowed_content_types = original
+      configuration.allowed_content_types = original_content_types
+      configuration.max_file_size = original_max_file_size
     end
 
     def create_image_asset(owner: member, filename: "existing.png", content_type: "image/png", community_shared: false)
@@ -121,6 +124,25 @@ module VenusMediaLibrary
         post "/venus_media_library/images.json", params: { file: file }, headers: venus_media_headers(member)
 
         expect(response).to have_http_status(:unprocessable_entity)
+      end
+
+      it "rejects a file whose declared type does not match its contents" do
+        file = fixture_file_upload("sample.png", "image/svg+xml")
+
+        post "/venus_media_library/images.json", params: { file: file }, headers: venus_media_headers(member)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body)["error"]).to include("does not match")
+      end
+
+      it "rejects files over the configured byte limit" do
+        VenusMediaLibrary.configuration.max_file_size = 1
+        file = fixture_file_upload("sample.png", "image/png")
+
+        post "/venus_media_library/images.json", params: { file: file }, headers: venus_media_headers(member)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body)["error"]).to include("upload limit")
       end
 
       it "returns an error when no file is provided" do

@@ -37,14 +37,13 @@ module VenusMediaLibrary
         return respond_error("No file was uploaded.", :unprocessable_entity)
       end
 
-      unless allowed_content_type?(uploaded.content_type)
-        return respond_error("Content type #{uploaded.content_type} is not allowed.", :unprocessable_entity)
-      end
+      detected_content_type = validated_content_type(uploaded)
+      return unless detected_content_type
 
       blob = ActiveStorage::Blob.create_and_upload!(
         io:           uploaded.tempfile,
         filename:     uploaded.original_filename,
-        content_type: uploaded.content_type,
+        content_type: detected_content_type,
         service_name: VenusMediaLibrary.configuration.storage_service
       )
       asset = VenusMediaLibrary::Asset.create!(
@@ -74,6 +73,28 @@ module VenusMediaLibrary
       return false if content_type.blank?
 
       Array(VenusMediaLibrary.configuration.allowed_content_types).include?(content_type)
+    end
+
+    def validated_content_type(uploaded)
+      if uploaded.size.to_i > VenusMediaLibrary.configuration.max_file_size.to_i
+        respond_error("File is larger than the #{VenusMediaLibrary.configuration.max_file_size} byte upload limit.", :unprocessable_entity)
+        return
+      end
+
+      detected = Marcel::MimeType.for(uploaded.tempfile, name: uploaded.original_filename)
+      unless allowed_content_type?(detected)
+        respond_error("Detected content type #{detected} is not allowed.", :unprocessable_entity)
+        return
+      end
+
+      if uploaded.content_type != detected
+        respond_error("Declared content type does not match the uploaded file.", :unprocessable_entity)
+        return
+      end
+
+      detected
+    ensure
+      uploaded.tempfile.rewind if uploaded&.tempfile&.respond_to?(:rewind)
     end
 
     def respond_error(message, status)

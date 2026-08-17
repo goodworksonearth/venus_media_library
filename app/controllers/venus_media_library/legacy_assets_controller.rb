@@ -14,7 +14,8 @@ module VenusMediaLibrary
 
     def show
       blob = unowned_legacy_image_blobs.find(params[:id])
-      send_data blob.download, filename: blob.filename.to_s, type: blob.content_type, disposition: "inline"
+      send_data blob.download, filename: blob.filename.to_s, type: blob.content_type,
+        disposition: delivery_disposition(blob)
     end
 
     def thumbnail
@@ -49,6 +50,10 @@ module VenusMediaLibrary
         url: legacy_asset_path(blob),
         thumb_url: thumbnail_legacy_asset_path(blob)
       }
+    end
+
+    def delivery_disposition(blob)
+      blob.content_type == "image/svg+xml" ? "attachment" : "inline"
     end
   end
 end

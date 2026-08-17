@@ -119,6 +119,9 @@ VenusMediaLibrary.configure do |config|
   # Images per page in the index / picker.
   config.per_page = 40
 
+  # Reject uploads larger than this many bytes (10 MiB by default).
+  config.max_file_size = 10 * 1024 * 1024
+
   # Which Active Storage service to store uploads on. nil = the host app's
   # default service (Disk in dev, S3 in prod, etc.).
   config.storage_service = nil
@@ -148,6 +151,8 @@ end
 - **`thumbnail_size`** — Array of `[width, height]` for grid thumbnails. Larger values give better preview quality at the cost of image processing overhead and bandwidth.
 
 - **`per_page`** — Number of images to display per page. Smaller values suit mobile-friendly UIs; larger values reduce pagination clicks. JSON callers can request up to 100 images per page.
+
+- **`max_file_size`** — Maximum upload size in bytes. The default is 10 MiB.
 
 - **`storage_service`** — Active Storage service name (e.g. `:amazon`, `:google`). Leave `nil` to use the host app's default, making the engine truly storage-agnostic. Uploads automatically inherit the configured service.
 
@@ -284,6 +289,8 @@ When testing a host app that uses Media Library, you can:
 Each upload is owned by the user returned by `config.current_user` and starts private. A member can browse and download their own uploads; checking **Share with community** during upload makes that item visible to other signed-in members. Admins, as determined by `config.admin`, can browse and download every engine-managed upload.
 
 The engine sends originals and thumbnails through its own authorization-aware routes. Do not use an Active Storage blob URL as a substitute for an engine media URL, because it bypasses the ownership check.
+
+The upload endpoint verifies the detected MIME type with Marcel, requires it to match the browser-declared type, enforces the allowlist and `max_file_size`, and stores the detected type. SVG remains supported, but originals are delivered as downloads rather than inline documents to avoid executing SVG active content in the host application's origin.
 
 Blobs that existed before the engine was installed have no owner and are intentionally invisible to normal members. Admins can use **Import unowned legacy uploads** from the library to claim an image into their private library, then use the normal community-sharing control if appropriate. Do not expose legacy blobs by direct Active Storage URLs.
 
