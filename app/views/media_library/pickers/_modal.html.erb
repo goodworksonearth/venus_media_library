@@ -1,0 +1,16 @@
+<%# Shared modal shell. Rendered once per page by media_picker_field. The picker
+    Turbo Frame is loaded into #media_library_picker on open. %>
+<div id="ml-modal" class="ml-modal" hidden aria-hidden="true" role="dialog" aria-modal="true" aria-label="Media Library">
+  <div class="ml-modal__backdrop" data-ml-close></div>
+  <div class="ml-modal__dialog">
+    <div class="ml-modal__header">
+      <h2 class="ml-modal__title">Media Library</h2>
+      <button type="button" class="ml-modal__close" data-ml-close aria-label="Close">&times;</button>
+    </div>
+    <div class="ml-modal__body">
+      <turbo-frame id="media_library_picker">
+        <p class="ml-empty">Loading…</p>
+      </turbo-frame>
+    </div>
+  </div>
+</div>

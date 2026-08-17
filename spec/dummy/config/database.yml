@@ -1,0 +1,21 @@
+# Dummy app database. The engine is database-agnostic; the dummy uses whatever
+# is convenient locally. Here: PostgreSQL over the local socket.
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  host: <%= ENV.fetch("PG_HOST", "localhost") %>
+  username: <%= ENV.fetch("PG_USERNAME", ENV["USER"]) %>
+  password: <%= ENV.fetch("PG_PASSWORD", "") %>
+
+development:
+  <<: *default
+  database: media_library_dummy_development
+
+test:
+  <<: *default
+  database: media_library_dummy_test
+
+production:
+  <<: *default
+  database: media_library_dummy_production
