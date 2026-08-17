@@ -17,7 +17,7 @@ module VenusMediaLibrary
     # [width, height] used for the grid thumbnail variant.
     attr_accessor :thumbnail_size
 
-    # Number of images per page in the index.
+    # Number of media assets per page in the index.
     attr_accessor :per_page
 
     # Maximum accepted upload size in bytes.

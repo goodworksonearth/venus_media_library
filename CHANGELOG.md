@@ -14,6 +14,8 @@ to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   engine mount point.
 - A headless Chrome system test covering picker open, existing-image selection,
   upload, and Escape-to-close behavior.
+- Settings-gated PDF uploads and selection. PDFs are disabled by default,
+  rendered as document tiles, and served only as protected attachments.
 - CI coverage for Ruby 3.2/Rails 7.1 and Ruby 3.4/Rails 8.1, plus contributor,
   security, and release documentation.
 

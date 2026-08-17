@@ -102,9 +102,9 @@
         if (!r.ok) throw new Error("Upload failed");
         return r.json();
       })
-      .then(function (image) {
-        if (status) status.textContent = "Uploaded " + image.filename;
-        prependTile(image);
+      .then(function (media) {
+        if (status) status.textContent = "Uploaded " + media.filename;
+        prependTile(media);
       })
       .catch(function () { if (status) status.textContent = "Upload failed."; });
   }
@@ -117,7 +117,7 @@
     return "images";
   }
 
-  function prependTile(image) {
+  function prependTile(media) {
     var grid = document.querySelector("[data-ml-grid]");
     if (!grid) return;
     // Build with DOM methods (not innerHTML): filenames are user-controlled, so
@@ -125,21 +125,29 @@
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "ml-tile";
-    btn.setAttribute("data-ml-signed-id", image.signed_id);
-    btn.setAttribute("data-ml-url", image.url);
-    btn.setAttribute("data-ml-filename", image.filename);
-    btn.title = image.filename;
+    btn.setAttribute("data-ml-signed-id", media.signed_id);
+    btn.setAttribute("data-ml-url", media.url);
+    btn.setAttribute("data-ml-filename", media.filename);
+    btn.title = media.filename;
 
-    var img = document.createElement("img");
-    img.src = image.thumb_url;
-    img.alt = image.filename;
-    img.loading = "lazy";
+    if (media.previewable) {
+      var img = document.createElement("img");
+      img.src = media.thumb_url;
+      img.alt = media.filename;
+      img.loading = "lazy";
+      btn.appendChild(img);
+    } else {
+      var documentTile = document.createElement("span");
+      documentTile.className = "ml-tile__document";
+      documentTile.setAttribute("aria-hidden", "true");
+      documentTile.textContent = media.content_type === "application/pdf" ? "PDF" : "FILE";
+      btn.appendChild(documentTile);
+    }
 
     var name = document.createElement("span");
     name.className = "ml-tile__name";
-    name.textContent = image.filename;
+    name.textContent = media.filename;
 
-    btn.appendChild(img);
     btn.appendChild(name);
     grid.insertBefore(btn, grid.firstChild);
   }

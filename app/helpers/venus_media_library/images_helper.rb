@@ -14,7 +14,8 @@ module VenusMediaLibrary
         created_at:   blob.created_at,
         community_shared: asset.community_shared,
         url:          ml_blob_url(asset),
-        thumb_url:    ml_thumb_url(asset)
+        previewable:  ml_previewable?(blob),
+        thumb_url:    ml_previewable?(blob) ? ml_thumb_url(asset) : nil
       }
     end
 
@@ -30,6 +31,13 @@ module VenusMediaLibrary
     # when the blob can't be variated (e.g. SVG).
     def ml_thumb_url(asset)
       venus_media_library.thumbnail_asset_path(asset)
+    end
+
+    # A PDF is a selectable media asset, but it must never be embedded in the
+    # picker or the library grid. The protected original route sends it as an
+    # attachment, and the UI renders a descriptive document tile instead.
+    def ml_previewable?(blob)
+      blob.content_type.to_s.start_with?("image/") && blob.content_type != "image/svg+xml"
     end
   end
 end

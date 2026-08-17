@@ -1,7 +1,7 @@
 <div class="ml-library">
   <header class="ml-library__header">
     <h1>Media Library</h1>
-    <p class="ml-library__count"><%= @total_count %> image<%= "s" unless @total_count == 1 %></p>
+    <p class="ml-library__count"><%= @total_count %> media asset<%= "s" unless @total_count == 1 %></p>
     <% if venus_media_library_admin? %>
       <p><%= link_to "Import unowned legacy uploads", legacy_assets_path, class: "ml-btn" %></p>
     <% end %>
@@ -10,7 +10,7 @@
   <%= render "venus_media_library/shared/tabs", active_tab: :library %>
 
   <% if @images.empty? %>
-    <p class="ml-empty">No images yet. Upload one to get started.</p>
+    <p class="ml-empty">No media yet. Upload one to get started.</p>
   <% else %>
     <div class="ml-grid" data-ml-grid>
       <%= render partial: "venus_media_library/images/image", collection: @images, as: :image %>
