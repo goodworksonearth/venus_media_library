@@ -71,7 +71,12 @@
       input.dispatchEvent(new Event("change", { bubbles: true }));
     }
     var hidden = document.querySelector('[data-ml-signed-id-for="' + activeTargetId + '"]');
-    if (hidden) hidden.value = signedId;
+    if (hidden) {
+      hidden.value = signedId;
+      // Attach mode ships the hidden field disabled so an empty value can't
+      // detach the current file; enable it now that a signed_id is set.
+      hidden.disabled = false;
+    }
 
     closeModal();
   }

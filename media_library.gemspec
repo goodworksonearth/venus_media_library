@@ -20,11 +20,14 @@ Gem::Specification.new do |spec|
 
   spec.metadata["source_code_uri"]   = "https://github.com/goodworksonearth/media_library"
   spec.metadata["changelog_uri"]     = "https://github.com/goodworksonearth/media_library/blob/main/CHANGELOG.md"
+  spec.metadata["bug_tracker_uri"]   = "https://github.com/goodworksonearth/media_library/issues"
   spec.metadata["rubygems_mfa_required"] = "true"
 
+  # Ship only the runtime engine (no specs/dummy app) in the published gem.
   spec.files = Dir.chdir(File.expand_path(__dir__)) do
     Dir["{app,config,db,lib}/**/*", "MIT-LICENSE", "Rakefile", "README.md", "CHANGELOG.md"]
   end
+  spec.require_paths = [ "lib" ]
 
   spec.add_dependency "rails", ">= 7.1"
   spec.add_dependency "image_processing", "~> 1.12"

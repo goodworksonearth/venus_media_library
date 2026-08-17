@@ -17,9 +17,15 @@ module MediaLibrary
     end
 
     # Permanent URL to the original file. Active Storage route helpers live on the
-    # host app, so they are reached through the `main_app` proxy.
+    # host app, so they are reached through the `main_app` proxy. With
+    # url_type = :proxy the URL streams through Rails (works for private buckets
+    # and external crawlers); the default :redirect 302s to the storage URL.
     def ml_blob_url(blob)
-      main_app.rails_blob_url(blob)
+      if MediaLibrary.configuration.url_type == :proxy
+        main_app.rails_storage_proxy_url(blob)
+      else
+        main_app.rails_blob_url(blob)
+      end
     rescue StandardError
       main_app.rails_blob_path(blob)
     end
