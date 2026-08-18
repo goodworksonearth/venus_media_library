@@ -1,0 +1,8 @@
+<%# Inner visual of a picker tile: thumbnail for previewable images, otherwise a
+    document badge. Shared between the selectable and disabled tile variants. %>
+<% if item[:previewable] %>
+  <img src="<%= item[:thumb_url] %>" alt="<%= item[:filename] %>" loading="lazy">
+<% else %>
+  <span class="ml-tile__document" aria-hidden="true"><%= item[:content_type] == "application/pdf" ? "PDF" : "FILE" %></span>
+<% end %>
+<span class="ml-tile__name"><%= item[:filename] %></span>

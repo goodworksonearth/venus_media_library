@@ -3,3 +3,10 @@
 <%= form_with model: @widget, url: "#" do |form| %>
   <%= media_picker_field form, :name, label: "Choose media" %>
 <% end %>
+
+<%# An image-only field: exercises picker field-type awareness (disabled tiles
+    for non-image assets, image-only upload accept). Distinct form name so the
+    generated input id differs from the field above. %>
+<%= form_with model: @widget, url: "#", scope: :img_only do |form| %>
+  <%= media_picker_field form, :name, label: "Choose image only", accept: "image/png" %>
+<% end %>

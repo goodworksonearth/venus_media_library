@@ -31,6 +31,7 @@ module VenusMediaLibrary
 
       detected_content_type = validated_content_type(uploaded)
       return unless detected_content_type
+      return unless field_accepts?(detected_content_type)
 
       blob = ActiveStorage::Blob.create_and_upload!(
         io:           uploaded.tempfile,
@@ -58,6 +59,18 @@ module VenusMediaLibrary
       return false if content_type.blank?
 
       Array(VenusMediaLibrary.configuration.allowed_content_types).include?(content_type)
+    end
+
+    # When the picker was opened for a field that declares accepted types, the
+    # upload must satisfy them too (not just the global allowlist). The `accept`
+    # param travels from the field through the picker frame to this upload.
+    def field_accepts?(content_type)
+      field_types = AcceptedTypes.parse(params[:accept])
+      return true unless field_types.any?
+      return true if field_types.matches?(content_type)
+
+      respond_error("Content type #{content_type} is not accepted by this field.", :unprocessable_entity)
+      false
     end
 
     def validated_content_type(uploaded)

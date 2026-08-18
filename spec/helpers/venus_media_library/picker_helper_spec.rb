@@ -48,5 +48,23 @@ module VenusMediaLibrary
       expect(first.scan("ml-modal__dialog").size).to eq(1)
       expect(second.scan("ml-modal__dialog").size).to eq(0)
     end
+
+    it "carries the field's accepted types into the picker source" do
+      html = helper.media_picker_field(form, :og_image, accept: "image/png,image/jpeg")
+
+      expect(html).to include("accept=image").or include("accept%3Dimage")
+    end
+
+    it "derives accepted types from an input_html accept attribute" do
+      html = helper.media_picker_field(form, :og_image, input_html: { accept: "image/webp" })
+
+      expect(html).to include("image/webp").or include("image%2Fwebp")
+    end
+
+    it "omits the accept param when the field declares nothing" do
+      html = helper.media_picker_field(form, :og_image)
+
+      expect(html).not_to include("accept=")
+    end
   end
 end

@@ -1,27 +1,36 @@
 <%# Picker body loaded into the modal as a Turbo Frame. `target` is the id of the
-    host input to receive the chosen image. %>
-<turbo-frame id="venus_media_library_picker" class="ml-picker" data-ml-target="<%= target %>">
+    host input to receive the chosen asset; `accept` (the field's declared types)
+    rides along on the frame so uploads POST it and every tab link preserves it.
+    Categories (Images/Legacy/Static/Cloud/Community) are tabs that reload this
+    same frame. %>
+<turbo-frame id="venus_media_library_picker" class="ml-picker"
+             data-ml-target="<%= target %>"
+             data-ml-accept="<%= accept %>">
   <div class="ml-picker__toolbar">
     <label class="ml-btn ml-btn--primary">
       Upload media
-      <input id="image-upload" type="file" accept="<%= Array(VenusMediaLibrary.configuration.allowed_content_types).join(",") %>" hidden data-ml-upload>
+      <input id="image-upload" type="file" accept="<%= accept_attr %>" hidden data-ml-upload>
     </label>
     <label class="ml-picker__share"><input type="checkbox" data-ml-community-share> Share with community</label>
     <span class="ml-picker__hint" data-ml-status></span>
   </div>
 
-  <% if images.empty? %>
-    <p class="ml-empty">No media yet. Upload one above.</p>
+  <%= render "venus_media_library/pickers/tabs",
+             tabs: tabs, active: category, target: target, accept: accept %>
+
+  <% if items.empty? %>
+    <p class="ml-empty">No media in this section yet.</p>
   <% else %>
     <div class="ml-grid" data-ml-grid>
-      <%= render partial: "venus_media_library/images/image", collection: images, as: :image %>
+      <%= render partial: "venus_media_library/pickers/tile", collection: items, as: :item %>
     </div>
   <% end %>
 
   <% if has_more %>
     <div class="ml-picker__more">
-      <a href="<%= picker_path(target: target, page: page + 1) %>"
+      <a href="<%= picker_path(target: target, accept: accept, category: category, page: page + 1) %>"
          data-turbo-frame="venus_media_library_picker"
+         data-ml-picker-nav
          class="ml-btn">Load older</a>
     </div>
   <% end %>

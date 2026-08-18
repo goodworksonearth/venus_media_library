@@ -3,6 +3,7 @@
 // Wiring (all via delegated events, no framework required):
 //   [data-ml-open][data-ml-target][data-ml-src]  open the modal for a field
 //   [data-ml-close]                               close the modal
+//   [data-ml-picker-nav]                          switch category / paginate in-frame
 //   .ml-tile[data-ml-url][data-ml-signed-id]      choose an image
 //   input[data-ml-upload]                         upload a new image
 //
@@ -61,6 +62,8 @@
 
   function chooseTile(tile) {
     if (!activeTargetId) { closeModal(); return; }
+    // Assets whose type the field doesn't accept render disabled; never pick one.
+    if (tile.disabled || tile.classList.contains("ml-tile--disabled")) return;
     var url = tile.getAttribute("data-ml-url");
     var signedId = tile.getAttribute("data-ml-signed-id");
 
@@ -71,10 +74,12 @@
       input.dispatchEvent(new Event("change", { bubbles: true }));
     }
     var hidden = document.querySelector('[data-ml-signed-id-for="' + activeTargetId + '"]');
-    if (hidden) {
+    if (hidden && signedId) {
       hidden.value = signedId;
       // Attach mode ships the hidden field disabled so an empty value can't
-      // detach the current file; enable it now that a signed_id is set.
+      // detach the current file; enable it now that a signed_id is set. External
+      // assets (static/cloud) carry no signed_id, so we skip this entirely and
+      // leave any existing attachment intact.
       hidden.disabled = false;
     }
 
@@ -92,6 +97,11 @@
     form.append("file", file);
     var share = document.querySelector("[data-ml-community-share]");
     form.append("community_shared", share && share.checked ? "1" : "0");
+    // Constrain the upload to the opening field's accepted types (server
+    // re-validates); the frame carries them as data-ml-accept.
+    var f = frame();
+    var accept = f ? f.getAttribute("data-ml-accept") : null;
+    if (accept) form.append("accept", accept);
 
     var headers = { "Accept": "application/json" };
     var token = csrfToken();
@@ -162,6 +172,15 @@
     if (e.target.closest("[data-ml-close]")) {
       e.preventDefault();
       closeModal();
+      return;
+    }
+    // Category tabs / "load older" reload the picker frame in place. When Turbo
+    // is present it drives the frame via data-turbo-frame; otherwise fetch it.
+    var nav = e.target.closest("[data-ml-picker-nav]");
+    if (nav && nav.closest("#" + MODAL_ID)) {
+      if (window.Turbo && frame() && frame().tagName.toLowerCase() === "turbo-frame") return;
+      e.preventDefault();
+      loadFrame(nav.getAttribute("href"));
       return;
     }
     var tile = e.target.closest(".ml-tile");

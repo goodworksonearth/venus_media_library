@@ -225,6 +225,28 @@ module VenusMediaLibrary
         post "/venus_media_library/images.json", headers: venus_media_headers(member)
         expect(response).to have_http_status(:unprocessable_entity)
       end
+
+      it "rejects an upload whose type the opening field does not accept" do
+        VenusMediaLibrary.configuration.allowed_content_types += [ "application/pdf" ]
+        file = fixture_file_upload("sample.pdf", "application/pdf")
+
+        expect {
+          post "/venus_media_library/images.json", params: { file: file, accept: "image/png" }, headers: venus_media_headers(member)
+        }.not_to change(VenusMediaLibrary::Asset, :count)
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body)["error"]).to include("not accepted by this field")
+      end
+
+      it "accepts an upload matching the field's declared types" do
+        file = fixture_file_upload("sample.png", "image/png")
+
+        expect {
+          post "/venus_media_library/images.json", params: { file: file, accept: "image/png,image/svg+xml" }, headers: venus_media_headers(member)
+        }.to change(VenusMediaLibrary::Asset, :count).by(1)
+
+        expect(response).to have_http_status(:created)
+      end
     end
   end
 end

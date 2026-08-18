@@ -11,9 +11,19 @@
 
   <%= stylesheet_link_tag    "venus_media_library/application", media: "all" %>
 </head>
-<body>
+<body class="ml-body">
 
-<%= yield %>
+<%# Full-page management workspace: a 30% left-nav column beside a 70% content
+    column. This layout is used only for full-page requests; the picker modal
+    renders with `layout: false`, so it stays lean and keeps its horizontal tabs. %>
+<div class="ml-layout">
+  <aside class="ml-layout__nav">
+    <%= render "venus_media_library/shared/sidebar" %>
+  </aside>
+  <main class="ml-layout__content">
+    <%= yield %>
+  </main>
+</div>
 
 </body>
 </html>
