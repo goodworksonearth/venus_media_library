@@ -30,5 +30,5 @@ Gem::Specification.new do |spec|
   spec.require_paths = [ "lib" ]
 
   spec.add_dependency "rails", ">= 7.1", "< 9.0"
-  spec.add_dependency "image_processing", "~> 1.12"
+  spec.add_dependency "image_processing", ">= 1.12", "< 3.0"
 end
