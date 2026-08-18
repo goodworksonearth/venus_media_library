@@ -4,6 +4,29 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-08-18
+
+### Added
+- **Full-page library navigation.** At the engine mount point (`/media`) the
+  library now renders a role-gated vertical left-nav in a 30/70 split — a proper
+  browsing/management workspace — while the picker modal stays lean for everyday
+  "pick and go." Nav entries are built from the same admin gate that guards the
+  controllers, so a link is never shown that the controller would `403`.
+- **Category tabs in the picker modal.** The modal exposes Images / Legacy /
+  Static / Cloud / Community tabs (Legacy is admin-only), each loading its
+  category into the picker Turbo Frame.
+- **Field-aware type enforcement.** A host field's accepted content types now
+  flow (`media_picker_field`/`media_attach_field` → `picker_path(accept:)` →
+  frame) into the picker. Assets whose type does not match are rendered
+  non-selectable, and uploads of a disallowed type are rejected client-side and
+  re-validated server-side (422). Falls back to the configured global allowlist
+  when a field declares nothing, and never widens past it.
+
+### Notes
+- Static/Cloud assets have no Active Storage `signed_id`; they are pickable into
+  URL fields but cannot be attached to `has_one_attached` fields, and selecting
+  one never disturbs an existing attachment.
+
 ## [1.0.0] - 2026-08-17
 
 ### Added

@@ -31,4 +31,9 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency "rails", ">= 7.1", "< 9.0"
   spec.add_dependency "image_processing", ">= 1.12", "< 3.0"
+  # image_processing >= 2.0 dropped the MiniMagick backend and is libvips-only, so
+  # the vips Ruby binding must be present for ActiveStorage variant processing to
+  # boot. Declaring it here means host apps get a working image pipeline out of the
+  # box (the OS-level libvips is still required — see docs/RELEASING.md / CI).
+  spec.add_dependency "ruby-vips", ">= 2.1"
 end

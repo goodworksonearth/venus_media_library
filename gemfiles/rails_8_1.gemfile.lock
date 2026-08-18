@@ -1,9 +1,10 @@
 PATH
   remote: ..
   specs:
-    venus_media_library (1.0.0)
-      image_processing (~> 1.12)
+    venus_media_library (1.1.0)
+      image_processing (>= 1.12, < 3.0)
       rails (>= 7.1, < 9.0)
+      ruby-vips (>= 2.1)
 
 GEM
   remote: https://rubygems.org/
