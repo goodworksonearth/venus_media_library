@@ -32,8 +32,9 @@ module VenusMediaLibrary
 
       signed_id_field = opts.fetch(:signed_id_field, "#{field}_signed_id")
 
-      # Endpoint the JS uses to load the picker frame for this field.
-      picker_src = venus_media_library.picker_path(target: input_id)
+      # Endpoint the JS uses to load the picker frame for this field. The field's
+      # accepted content types travel with it so the modal can filter/validate.
+      picker_src = ml_picker_src(input_id, opts)
 
       content_tag(:div, class: wrapper, data: { ml_field: input_id }) do
         parts = []
@@ -88,7 +89,7 @@ module VenusMediaLibrary
         placeholder: opts[:placeholder]
       }.merge(opts[:input_html] || {})
 
-      picker_src = venus_media_library.picker_path(target: input_id)
+      picker_src = ml_picker_src(input_id, opts)
 
       content_tag(:div, class: wrapper, data: { ml_field: input_id }) do
         parts = []
@@ -130,6 +131,18 @@ module VenusMediaLibrary
       rescue StandardError
         ""
       end
+    end
+
+    # Picker frame endpoint for a field, carrying the field's accepted content
+    # types when declared. Types come from an explicit `accept:` option, or from
+    # the field's own `input_html[:accept]` so the host declares them once. When
+    # nothing is declared the param is omitted and the modal falls back to the
+    # globally configured `allowed_content_types`.
+    def ml_picker_src(input_id, opts)
+      accept = opts[:accept].presence || opts.dig(:input_html, :accept).presence
+      params = { target: input_id }
+      params[:accept] = accept if accept
+      venus_media_library.picker_path(**params)
     end
 
     # Renders the shared modal shell once per page. The picker frame is lazy

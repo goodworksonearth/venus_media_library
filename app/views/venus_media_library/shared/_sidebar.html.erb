@@ -1,8 +1,8 @@
 <%# Full-page left navigation for the media library management workspace.
     Rendered ONLY by the engine layout (application.html.erb) — i.e. the /media
     full-page context. The picker modal renders with `layout: false` and keeps
-    its own lean horizontal tabs (shared/_tabs), so this sidebar never appears
-    there. Entries and role-gating come from `venus_media_library_nav_items`;
+    its own lean horizontal category tabs (pickers/_tabs), so this sidebar never
+    appears there. Entries and role-gating come from `venus_media_library_nav_items`;
     the active section from `venus_media_library_active_nav`, both derived from
     the current controller so views don't pass an explicit local.
 

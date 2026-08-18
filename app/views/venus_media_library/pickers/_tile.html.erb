@@ -1,0 +1,22 @@
+<%# One selectable media tile in the picker. `item` is a normalized payload with
+    a :selectable flag. When the opening field does not accept the asset's type
+    the tile is rendered disabled and greyed out (with a hint) so it cannot be
+    returned to that field — enforced both here and, defensively, in the JS. %>
+<% if item[:selectable] %>
+  <button type="button"
+          class="ml-tile"
+          data-ml-signed-id="<%= item[:signed_id] %>"
+          data-ml-url="<%= item[:url] %>"
+          data-ml-filename="<%= item[:filename] %>"
+          title="<%= item[:filename] %>">
+    <%= render "venus_media_library/pickers/tile_body", item: item %>
+  </button>
+<% else %>
+  <button type="button"
+          class="ml-tile ml-tile--disabled"
+          disabled
+          aria-disabled="true"
+          title="This field doesn't accept <%= item[:content_type] %> files">
+    <%= render "venus_media_library/pickers/tile_body", item: item %>
+  </button>
+<% end %>

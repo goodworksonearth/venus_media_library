@@ -1,0 +1,14 @@
+<%# Category tabs inside the picker modal. Each tab reloads the picker Turbo
+    Frame for a different asset collection while preserving the field context
+    (target + accepted types). Distinct from the full-page left sidebar: the
+    modal keeps a compact horizontal tab bar. `data-ml-picker-nav` lets the
+    vanilla JS load the frame when Turbo is not present. %>
+<nav class="ml-tabs ml-picker__tabs" aria-label="Media categories">
+  <% tabs.each do |tab| %>
+    <%= link_to tab[:label],
+          picker_path(target: target, accept: accept, category: tab[:key]),
+          class: "ml-tabs__tab",
+          data: { turbo_frame: "venus_media_library_picker", ml_picker_nav: true },
+          aria: { current: active == tab[:key] ? "page" : nil } %>
+  <% end %>
+</nav>
