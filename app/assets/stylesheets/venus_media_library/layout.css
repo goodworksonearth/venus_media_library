@@ -1,0 +1,82 @@
+/*
+ * Full-page media library management workspace shell. Namespaced under .ml-* to
+ * avoid clashing with the host app. This styles the /media full-page context
+ * only; the picker modal keeps its own lean layout in picker.css.
+ */
+
+.ml-body { margin: 0; }
+
+/* 30% left navigation column beside a 70% content column. */
+.ml-layout {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+}
+.ml-layout__nav {
+  flex: 0 0 30%;
+  max-width: 30%;
+  box-sizing: border-box;
+  background: #f7f8fa;
+  border-right: 1px solid #e2e2e2;
+}
+.ml-layout__content {
+  flex: 1 1 70%;
+  min-width: 0; /* let the grid shrink instead of overflowing the row */
+  box-sizing: border-box;
+}
+
+/* Sidebar navigation. */
+.ml-nav {
+  position: sticky;
+  top: 0;
+  padding: 1rem .75rem;
+}
+.ml-nav__brand {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #1d4f80;
+  padding: .25rem .75rem 1rem;
+}
+.ml-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+.ml-nav__link {
+  display: block;
+  padding: .55rem .75rem;
+  color: #333;
+  text-decoration: none;
+  border-radius: 6px;
+  border-left: 3px solid transparent;
+}
+.ml-nav__link:hover { background: #eef1f5; color: #1d4f80; }
+.ml-nav__link[aria-current="page"] {
+  background: #e7eefb;
+  color: #1d4f80;
+  border-left-color: #2b6cb0;
+  font-weight: 600;
+}
+
+/* Responsive: stack the nav above the content and lay entries out as a wrapping
+ * horizontal bar on narrow viewports. */
+@media (max-width: 640px) {
+  .ml-layout { flex-direction: column; min-height: 0; }
+  .ml-layout__nav {
+    flex-basis: auto;
+    max-width: none;
+    border-right: 0;
+    border-bottom: 1px solid #e2e2e2;
+  }
+  .ml-nav { position: static; padding: .5rem; }
+  .ml-nav__brand { padding: .25rem .5rem .5rem; }
+  .ml-nav__list { flex-direction: row; flex-wrap: wrap; gap: .25rem; }
+  .ml-nav__link { border-left: 0; border-bottom: 3px solid transparent; }
+  .ml-nav__link[aria-current="page"] {
+    border-left-color: transparent;
+    border-bottom-color: #2b6cb0;
+  }
+}

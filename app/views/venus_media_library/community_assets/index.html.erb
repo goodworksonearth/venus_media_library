@@ -4,7 +4,7 @@
     <p class="ml-library__count"><%= @total_count %> image<%= "s" unless @total_count == 1 %></p>
   </header>
 
-  <%= render "venus_media_library/shared/tabs", active_tab: :community %>
+  <%# Navigation moved to the full-page left sidebar (engine layout). %>
 
   <% if @images.empty? %>
     <p class="ml-empty">No community assets have been shared yet.</p>

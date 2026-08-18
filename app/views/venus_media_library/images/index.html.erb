@@ -7,7 +7,8 @@
     <% end %>
   </header>
 
-  <%= render "venus_media_library/shared/tabs", active_tab: :library %>
+  <%# Primary navigation now lives in the full-page left sidebar (see the engine
+      layout). The horizontal tabs partial is retained for the lean picker modal. %>
 
   <% if @images.empty? %>
     <p class="ml-empty">No media yet. Upload one to get started.</p>

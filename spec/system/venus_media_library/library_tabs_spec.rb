@@ -1,6 +1,6 @@
 require "rails_helper"
 
-RSpec.describe "media library tabs", type: :system do
+RSpec.describe "media library left navigation", type: :system do
   let!(:member) { Widget.create!(name: "member") }
 
   around do |example|
@@ -15,22 +15,26 @@ RSpec.describe "media library tabs", type: :system do
     configuration.cloud_assets = original_cloud_assets
   end
 
-  it "navigates between private, community, static, and cloud asset views" do
+  it "navigates private, community, static, and cloud views from the left sidebar" do
     visit "/venus_media_library"
 
-    expect(page).to have_css(".ml-tabs__tab[aria-current='page']", text: "My Library")
-    click_link "Community"
-    expect(page).to have_css("h1", text: "Community Assets")
-    expect(page).to have_css(".ml-tabs__tab[aria-current='page']", text: "Community")
+    # Full page uses the left-nav management shell, not the horizontal tab bar.
+    expect(page).to have_css(".ml-layout__nav .ml-nav")
+    expect(page).to have_no_css(".ml-tabs")
+    expect(page).to have_css(".ml-nav__link[aria-current='page']", text: "My Library")
 
-    click_link "Static Assets"
+    within(".ml-nav") { click_link "Community" }
+    expect(page).to have_css("h1", text: "Community Assets")
+    expect(page).to have_css(".ml-nav__link[aria-current='page']", text: "Community")
+
+    within(".ml-nav") { click_link "Static Assets" }
     expect(page).to have_css("h1", text: "Static Assets")
     expect(page).to have_content("brand.svg")
-    expect(page).to have_css(".ml-tabs__tab[aria-current='page']", text: "Static Assets")
+    expect(page).to have_css(".ml-nav__link[aria-current='page']", text: "Static Assets")
 
-    click_link "Cloud Assets"
+    within(".ml-nav") { click_link "Cloud Assets" }
     expect(page).to have_css("h1", text: "Cloud Assets")
     expect(page).to have_content("cdn-logo.svg")
-    expect(page).to have_css(".ml-tabs__tab[aria-current='page']", text: "Cloud Assets")
+    expect(page).to have_css(".ml-nav__link[aria-current='page']", text: "Cloud Assets")
   end
 end

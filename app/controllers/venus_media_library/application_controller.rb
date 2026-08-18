@@ -1,6 +1,8 @@
 module VenusMediaLibrary
   class ApplicationController < ActionController::Base
-    helper_method :venus_media_library_admin?
+    helper_method :venus_media_library_admin?,
+                  :venus_media_library_nav_items,
+                  :venus_media_library_active_nav
     # Run the host-configured access gate (if any) before every engine action.
     # The engine ships open; the host restricts the picker/upload endpoints by
     # setting VenusMediaLibrary.configuration.authenticate_with to a proc.
@@ -26,6 +28,30 @@ module VenusMediaLibrary
 
     def venus_media_library_admin?
       instance_exec(venus_media_library_user, &VenusMediaLibrary.configuration.admin)
+    end
+
+    # Destinations for the full-page management workspace's left navigation.
+    # Role-gated: legacy imports and the settings overview are admin-only,
+    # mirroring the `require_venus_media_library_admin!` gate those controllers
+    # already enforce, so the sidebar never advertises a forbidden link.
+    def venus_media_library_nav_items
+      items = [
+        { key: :library,   controller: "images",           label: "My Library",    path: images_path },
+        { key: :legacy,    controller: "legacy_assets",    label: "Legacy Assets", path: legacy_assets_path, admin: true },
+        { key: :static,    controller: "static_assets",    label: "Static Assets", path: static_assets_path },
+        { key: :cloud,     controller: "cloud_assets",     label: "Cloud Assets",  path: cloud_assets_path },
+        { key: :community, controller: "community_assets", label: "Community",     path: community_assets_path },
+        { key: :settings,  controller: "settings",         label: "Settings",      path: settings_path, admin: true }
+      ]
+      return items if venus_media_library_admin?
+
+      items.reject { |item| item[:admin] }
+    end
+
+    # The nav key for the controller handling the current request, used by the
+    # sidebar to highlight the active section without each view passing a local.
+    def venus_media_library_active_nav
+      venus_media_library_nav_items.find { |item| item[:controller] == controller_name }&.fetch(:key)
     end
 
     def visible_media_assets

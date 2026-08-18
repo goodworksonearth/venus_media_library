@@ -4,7 +4,8 @@
     <p class="ml-library__count"><%= assets.size %> asset<%= "s" unless assets.size == 1 %></p>
   </header>
 
-  <%= render "venus_media_library/shared/tabs", active_tab: active_tab %>
+  <%# Navigation moved to the full-page left sidebar (engine layout); this
+      partial no longer needs an `active_tab` local. %>
 
   <% if assets.empty? %>
     <p class="ml-empty"><%= empty_message %></p>
