@@ -37,9 +37,11 @@ RSpec.describe "field-aware media picker", type: :system do
     # The PDF is greyed out and disabled, so the browser cannot pick it.
     expect(page).to have_css(".ml-tile.ml-tile--disabled[disabled]", text: "manual.pdf")
 
-    # The image is selectable and writes its URL into the image-only field.
+    # The image is selectable and writes its PUBLIC Active Storage URL into the
+    # image-only field (the crawler-fetchable value a host stores as og:image),
+    # not the owner-gated engine asset route.
     find(".ml-tile:not([disabled])", text: "picture.png").click
     expect(page).to have_no_css("#ml-modal.ml-modal--open")
-    expect(page).to have_field("img_only_name", with: %r{/venus_media_library/assets/\d+})
+    expect(page).to have_field("img_only_name", with: %r{/rails/active_storage/blobs/redirect/})
   end
 end

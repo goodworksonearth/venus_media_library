@@ -27,7 +27,9 @@ RSpec.describe "media picker", type: :system do
     expect(page).to have_css(".ml-tile", text: "existing.png")
 
     find(".ml-tile", text: "existing.png").click
-    expect(page).to have_field("widget_name", with: %r{/venus_media_library/assets/\d+})
+    # The picked value must be the PUBLIC, crawler-fetchable Active Storage URL
+    # (used verbatim as e.g. og:image), not the owner-gated engine asset route.
+    expect(page).to have_field("widget_name", with: %r{/rails/active_storage/blobs/redirect/})
     expect(page).to have_no_css("#ml-modal.ml-modal--open")
 
     click_button "Choose media"
