@@ -62,6 +62,18 @@ module VenusMediaLibrary
     # does not enumerate a cloud bucket or expose storage-provider credentials.
     attr_accessor :cloud_assets
 
+    # Default admin predicate. A gem shouldn't break just because a host app names
+    # its flag differently, so try the two common conventions — `admin?` then
+    # `is_admin?` — and fall back to non-admin. Hosts with any other scheme set
+    # their own `config.admin = ->(user) { ... }`.
+    DEFAULT_ADMIN = lambda do |user|
+      return false if user.nil?
+      return !!user.admin? if user.respond_to?(:admin?)
+      return !!user.is_admin? if user.respond_to?(:is_admin?)
+
+      false
+    end
+
     def initialize
       @allowed_content_types = %w[image/png image/jpeg image/jpg image/gif image/webp image/svg+xml]
       @thumbnail_size        = [ 300, 300 ]
@@ -71,7 +83,7 @@ module VenusMediaLibrary
       @url_type              = :redirect
       @authenticate_with     = nil
       @current_user          = -> { current_user }
-      @admin                 = ->(user) { user.admin? }
+      @admin                 = DEFAULT_ADMIN
       @asset_scope           = ->(scope) { scope }
       @legacy_blob_scope     = ->(scope) { scope.none }
       @static_assets         = -> { [] }

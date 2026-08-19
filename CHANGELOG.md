@@ -4,6 +4,15 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2026-08-19
+
+### Changed
+- The default admin predicate now recognises both the `admin?` **and**
+  `is_admin?` conventions (and returns non-admin for `nil`) instead of assuming
+  `admin?`. A host whose user model uses `is_admin?` no longer needs to set
+  `config.admin` just to avoid a `NoMethodError` from the role-gated library nav.
+  Any other scheme remains fully configurable via `config.admin`.
+
 ## [1.1.1] - 2026-08-19
 
 ### Fixed
