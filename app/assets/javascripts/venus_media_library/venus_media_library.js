@@ -14,6 +14,10 @@
   var MODAL_ID = "ml-modal";
   var FRAME_ID = "venus_media_library_picker";
   var activeTargetId = null;
+  // Advances whenever the grid's contents move forward — a new frame load, or
+  // an upload that inserted a tile. A frame response is applied only if it is
+  // still the newest thing to have happened (see loadFrame).
+  var frameGeneration = 0;
 
   function modal() { return document.getElementById(MODAL_ID); }
   function frame() { return document.getElementById(FRAME_ID); }
@@ -50,14 +54,22 @@
       f.setAttribute("src", src);
       return;
     }
+    // This response was rendered from the state the server had when the request
+    // went out. If an upload lands first, applying it would paint that older
+    // state over the new tile and silently lose it, so drop superseded replies.
+    var generation = ++frameGeneration;
     fetch(src, { headers: { "Accept": "text/html", "X-Requested-With": "XMLHttpRequest" } })
       .then(function (r) { return r.text(); })
       .then(function (html) {
+        if (generation !== frameGeneration) return;
         var doc = new DOMParser().parseFromString(html, "text/html");
         var incoming = doc.getElementById(FRAME_ID);
         f.innerHTML = incoming ? incoming.innerHTML : html;
       })
-      .catch(function () { f.innerHTML = '<p class="ml-empty">Could not load the library.</p>'; });
+      .catch(function () {
+        if (generation !== frameGeneration) return;
+        f.innerHTML = '<p class="ml-empty">Could not load the library.</p>';
+      });
   }
 
   function chooseTile(tile) {
@@ -130,6 +142,9 @@
   function prependTile(media) {
     var grid = document.querySelector("[data-ml-grid]");
     if (!grid) return;
+    // The grid now holds an asset no in-flight frame response knows about;
+    // supersede those replies so they cannot paint this tile away.
+    frameGeneration++;
     // Build with DOM methods (not innerHTML): filenames are user-controlled, so
     // assigning them as properties/attributes avoids any HTML injection.
     var btn = document.createElement("button");

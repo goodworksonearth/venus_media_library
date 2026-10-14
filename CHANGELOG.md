@@ -4,6 +4,19 @@ All notable changes to this project are documented here. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and this project adheres
 to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- An upload that completed while a picker frame load was still in flight had its
+  tile silently erased from the grid. The frame response is rendered from the
+  state the server held when the request went out, so applying it late painted
+  that pre-upload grid over the new tile — the asset stayed saved, but vanished
+  in front of the editor, with the "Uploaded …" status wiped along with it. Frame
+  responses are now versioned and a superseded one is discarded, so neither a
+  slow reply nor a rapidly-clicked category tab can undo newer grid state. This
+  also fixes the intermittent failure of the picker system spec, which reproduced
+  the race whenever the frame load happened to lose to the upload.
+
 ## [1.1.3] - 2026-08-19
 
 ### Fixed
