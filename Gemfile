@@ -8,7 +8,7 @@ gem "puma"
 # The dummy app uses a file-backed SQLite database. The engine itself is
 # database-agnostic (it only touches Active Storage tables), so contributors
 # and CI do not need a separate PostgreSQL service to run the test suite.
-gem "sqlite3", "~> 2.0"
+gem "sqlite3", "~> 2.10"
 
 gem "propshaft"
 
